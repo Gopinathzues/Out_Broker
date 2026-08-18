@@ -1,0 +1,60 @@
+# ==========================================
+# OutBroker - Git Ignore
+# ==========================================
+
+# Build output
+target/
+build/
+*.class
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse / Spring Tool Suite
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Local environment / secrets
+application.properties
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Java temporary files
+hs_err_pid*
+replay_pid*
