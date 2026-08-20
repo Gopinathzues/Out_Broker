@@ -1,7 +1,11 @@
 package outbroker_backend.property.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import outbroker_backend.common.dto.ApiResponse;
 import outbroker_backend.property.dto.CreatePropertyRequest;
@@ -28,13 +32,16 @@ public class PropertyController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/owner/{ownerId}")
+    @PostMapping
+    @PreAuthorize("hasAnyRole('LANDLORD', 'OWNER', 'BROKER', 'ADMIN')")
     public ResponseEntity<ApiResponse<PropertyResponse>> createProperty(
-            @PathVariable UUID ownerId,
             @Valid @RequestBody CreatePropertyRequest request) {
 
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + ownerId));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) auth.getPrincipal();
+
+        User owner = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + currentUser.getId()));
 
         Property property = new Property(
                 request.getTitle(),
@@ -52,7 +59,8 @@ public class PropertyController {
         );
 
         Property savedProperty = propertyService.createProperty(property);
-        return ResponseEntity.ok(ApiResponse.success("Property created successfully", new PropertyResponse(savedProperty)));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Property created successfully", new PropertyResponse(savedProperty)));
     }
 
     @GetMapping("/search")
@@ -88,18 +96,18 @@ public class PropertyController {
     }
 
     @GetMapping("/nearby")
-public ResponseEntity<ApiResponse<List<PropertyResponse>>> getNearbyProperties(
-        @RequestParam double latitude,
-        @RequestParam double longitude,
-        @RequestParam(defaultValue = "10") double radiusKm) {
+    public ResponseEntity<ApiResponse<List<PropertyResponse>>> getNearbyProperties(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "10") double radiusKm) {
 
-    List<PropertyResponse> properties =
-            propertyService.findNearbyProperties(latitude, longitude, radiusKm);
+        List<PropertyResponse> properties =
+                propertyService.findNearbyProperties(latitude, longitude, radiusKm);
 
-    return ResponseEntity.ok(
-            ApiResponse.success("Nearby properties retrieved successfully", properties)
-    );
-}
+        return ResponseEntity.ok(
+                ApiResponse.success("Nearby properties retrieved successfully", properties)
+        );
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PropertyResponse>> getPropertyById(@PathVariable UUID id) {
@@ -107,9 +115,8 @@ public ResponseEntity<ApiResponse<List<PropertyResponse>>> getNearbyProperties(
         return ResponseEntity.ok(ApiResponse.success("Property details retrieved successfully", new PropertyResponse(property)));
     }
 
-    
-
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('LANDLORD', 'OWNER', 'BROKER', 'ADMIN')")
     public ResponseEntity<ApiResponse<PropertyResponse>> updateProperty(
             @PathVariable UUID id,
             @Valid @RequestBody UpdatePropertyRequest request) {
@@ -130,6 +137,7 @@ public ResponseEntity<ApiResponse<List<PropertyResponse>>> getNearbyProperties(
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('LANDLORD', 'OWNER', 'BROKER', 'ADMIN')")
     public ResponseEntity<ApiResponse<String>> deleteProperty(@PathVariable UUID id) {
         propertyService.deleteProperty(id);
         return ResponseEntity.ok(ApiResponse.success("Property deleted successfully", null));

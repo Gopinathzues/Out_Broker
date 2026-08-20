@@ -2,9 +2,15 @@ package outbroker_backend.property.dto;
 
 import outbroker_backend.common.enums.PropertyStatus;
 import outbroker_backend.common.enums.PropertyType;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PropertySearchCriteria {
 
     private String city;

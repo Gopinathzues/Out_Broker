@@ -2,6 +2,10 @@
 # OutBroker - Git Ignore
 # ==========================================
 
+# Uploaded media assets
+uploads/*
+!uploads/.gitkeep
+
 # Build output
 target/
 build/

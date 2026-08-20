@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import outbroker_backend.user.entity.User;
 import outbroker_backend.user.repository.UserRepository;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -61,14 +62,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (user != null && jwtService.isTokenValid(jwt, user)) {
 
-                    // Make authenticated user ID available to controllers
                     request.setAttribute("userId", user.getId());
+
+                    // Grant both raw authority and ROLE_ prefix
+                    List<SimpleGrantedAuthority> authorities = List.of(
+                            new SimpleGrantedAuthority(user.getRole().name()),
+                            new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                    );
 
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     user,
                                     null,
-                                    Collections.emptyList()
+                                    authorities
                             );
 
                     authToken.setDetails(
