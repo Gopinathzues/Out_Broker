@@ -2,7 +2,8 @@ package outbroker_backend.common.enums;
 
 public enum VerificationStatus {
     UNVERIFIED,
-    PENDING,
-    VERIFIED,
+    BASIC_VERIFIED,
+    DOCUMENT_VERIFIED,
+    FULLY_VERIFIED,
     REJECTED
 }
