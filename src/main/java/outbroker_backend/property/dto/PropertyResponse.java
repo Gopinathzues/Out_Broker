@@ -4,6 +4,7 @@ import outbroker_backend.common.enums.PropertyStatus;
 import outbroker_backend.common.enums.PropertyType;
 import outbroker_backend.property.entity.Property;
 
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -55,4 +56,6 @@ public class PropertyResponse {
     public String getCity() { return city; }
     public String getAddress() { return address; }
     public UUID getOwnerId() { return ownerId; }
+
+    
 }
