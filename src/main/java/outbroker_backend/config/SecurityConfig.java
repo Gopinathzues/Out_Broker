@@ -28,24 +28,35 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/properties/filter").permitAll()
 
-                        // Owner-specific endpoint - requires LANDLORD role
-                        .requestMatchers("/api/v1/inquiries/owner").hasRole("LANDLORD")
+        // Authentication
+        .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // All other inquiries endpoints - just authenticated
-                        .requestMatchers("/api/v1/inquiries/**").authenticated()
+        // Public property discovery
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties/search").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties/filter").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties/nearby").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*").permitAll()
 
-                        // Property Images security rules
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*/images/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/properties/*/images/**").hasAnyRole("LANDLORD", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/properties/*/images/**").hasAnyRole("LANDLORD", "ADMIN")
+        // Owner inquiry endpoint
+        .requestMatchers("/api/v1/inquiries/owner").hasRole("LANDLORD")
 
-                        // Static Uploads
-                        .requestMatchers("/uploads/**").permitAll()
+        // Other inquiry endpoints
+        .requestMatchers("/api/v1/inquiries/**").authenticated()
 
-                        .anyRequest().authenticated())
+        // Property images
+        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*/images/**").permitAll()
+        .requestMatchers(HttpMethod.POST, "/api/v1/properties/*/images/**")
+            .hasAnyRole("LANDLORD", "ADMIN")
+        .requestMatchers(HttpMethod.DELETE, "/api/v1/properties/*/images/**")
+            .hasAnyRole("LANDLORD", "ADMIN")
+
+        // Static uploads
+        .requestMatchers("/uploads/**").permitAll()
+
+        .anyRequest().authenticated()
+)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

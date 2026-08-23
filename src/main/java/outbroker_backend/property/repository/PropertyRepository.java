@@ -11,7 +11,9 @@ import java.util.UUID;
 
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID>, JpaSpecificationExecutor<Property> {
-    List<Property> findByCityIgnoreCaseAndStatus(String city, PropertyStatus status);
-    List<Property> findByOwnerId(UUID ownerId);
+
+    // Derived query method to support getAvailablePropertiesByCity
+    List<Property> findByCityAndStatus(String city, PropertyStatus status);
+
     List<Property> findByStatus(PropertyStatus status);
 }
