@@ -1,0 +1,1290 @@
+/* ============================================================
+   OUTBROKER REGISTER PAGE
+   ============================================================ */
+
+.register-page {
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  display: flex;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 5% 10%,
+      rgba(255, 45, 45, 0.08),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 96% 42%,
+      rgba(30, 74, 135, 0.05),
+      transparent 24%
+    ),
+    #f8fafc;
+
+  color: var(--ob-text);
+  box-sizing: border-box;
+}
+
+.register-page *,
+.register-page *::before,
+.register-page *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+
+.register-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.register-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.register-orb-one {
+  width: 280px;
+  height: 280px;
+  left: -150px;
+  top: -90px;
+  background: rgba(255, 42, 42, 0.06);
+}
+
+.register-orb-two {
+  width: 220px;
+  height: 220px;
+  right: -120px;
+  top: 28%;
+  background: rgba(255, 42, 42, 0.045);
+}
+
+.register-orb-three {
+  width: 260px;
+  height: 260px;
+  right: -150px;
+  bottom: -120px;
+  background: rgba(27, 70, 128, 0.035);
+}
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+
+.register-back-button {
+  position: fixed;
+  z-index: 5;
+
+  top: clamp(22px, 4vh, 58px);
+  left: clamp(20px, 4vw, 58px);
+
+  width: clamp(46px, 4.8vw, 58px);
+  height: clamp(46px, 4.8vw, 58px);
+
+  border: 1px solid rgba(213, 222, 235, 0.9);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.92);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--ob-text);
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 28px rgba(31, 49, 79, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.register-back-button:hover {
+  transform: translateX(-2px);
+  box-shadow:
+    0 12px 32px rgba(31, 49, 79, 0.12);
+}
+
+.register-back-button:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+
+.register-shell {
+  position: relative;
+  z-index: 1;
+
+  width: min(100%, 860px);
+
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding:
+    clamp(72px, 9vh, 112px)
+    clamp(16px, 4vw, 36px)
+    clamp(24px, 5vh, 48px);
+}
+
+/* ============================================================
+   BRAND
+   ============================================================ */
+
+.register-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  margin-bottom: clamp(28px, 4vh, 42px);
+}
+
+.register-brand-mark {
+  width: clamp(58px, 7vw, 72px);
+  height: clamp(58px, 7vw, 72px);
+
+  border-radius: 20px;
+
+  background: rgba(255, 235, 235, 0.72);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+}
+
+.register-house {
+  position: relative;
+  width: 31px;
+  height: 31px;
+}
+
+.register-roof {
+  position: absolute;
+
+  width: 22px;
+  height: 22px;
+
+  left: 4px;
+  top: 3px;
+
+  border-left: 3px solid var(--ob-red);
+  border-top: 3px solid var(--ob-red);
+
+  transform: rotate(45deg);
+  border-radius: 4px;
+}
+
+.register-house-body {
+  position: absolute;
+
+  left: 6px;
+  top: 12px;
+
+  width: 19px;
+  height: 16px;
+
+  border: 3px solid var(--ob-red);
+  border-top: none;
+
+  border-radius: 0 0 5px 5px;
+}
+
+.register-door {
+  position: absolute;
+
+  width: 5px;
+  height: 10px;
+
+  left: 13px;
+  top: 18px;
+
+  background: var(--ob-red);
+  border-radius: 2px 2px 0 0;
+}
+
+.register-brand-name {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 850;
+  letter-spacing: -1.8px;
+  line-height: 1;
+}
+
+.register-red {
+  color: var(--ob-red);
+}
+
+.register-blue {
+  color: var(--ob-blue);
+}
+
+.register-tagline {
+  margin: 8px 0 0;
+
+  font-size: clamp(12px, 1.8vw, 15px);
+  font-weight: 600;
+
+  color: var(--ob-text-soft);
+}
+
+.register-accent {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 13px;
+}
+
+.register-accent span {
+  display: block;
+  height: 4px;
+  border-radius: 10px;
+}
+
+.register-accent .accent-red {
+  width: 30px;
+  background: var(--ob-red);
+}
+
+.register-accent .accent-blue {
+  width: 13px;
+  background: var(--ob-blue);
+}
+
+.register-accent .accent-red-small {
+  width: 5px;
+  background: var(--ob-red);
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.register-card {
+  width: min(100%, 680px);
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border: 1px solid rgba(255, 255, 255, 0.95);
+
+  border-radius: clamp(22px, 3vw, 30px);
+
+  padding:
+    clamp(24px, 4vw, 38px)
+    clamp(20px, 5vw, 52px)
+    clamp(28px, 4vw, 42px);
+
+  box-shadow:
+    0 24px 70px rgba(31, 49, 79, 0.10),
+    0 4px 18px rgba(31, 49, 79, 0.04);
+}
+
+/* ============================================================
+   TRUST BADGE
+   ============================================================ */
+
+.register-trust-badge {
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 9px 13px;
+
+  border-radius: 999px;
+
+  background: var(--ob-red-soft);
+  color: var(--ob-red);
+
+  font-size: 12px;
+  font-weight: 750;
+
+  margin-bottom: clamp(22px, 3vh, 30px);
+}
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.register-heading {
+  margin-bottom: clamp(22px, 3vh, 30px);
+}
+
+.register-heading h1 {
+  margin: 0;
+
+  font-size: clamp(25px, 4vw, 34px);
+  line-height: 1.12;
+
+  letter-spacing: -1px;
+  font-weight: 850;
+
+  color: var(--ob-text);
+}
+
+.register-heading p {
+  margin: 9px 0 0;
+
+  font-size: clamp(13px, 1.8vw, 16px);
+  line-height: 1.55;
+
+  color: var(--ob-text-soft);
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: clamp(17px, 2.4vh, 23px);
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-field label,
+.register-label-row label {
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  color: var(--ob-text);
+}
+
+.register-input-wrapper,
+.register-phone-wrapper {
+  width: 100%;
+  height: clamp(54px, 7vw, 64px);
+
+  border: 1px solid #d8e1ed;
+  border-radius: 15px;
+
+  background: var(--ob-white);
+
+  display: flex;
+  align-items: center;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.register-input-wrapper:focus-within,
+.register-phone-wrapper:focus-within {
+  border-color: var(--ob-red);
+
+  box-shadow:
+    0 0 0 4px rgba(255, 53, 53, 0.08);
+}
+
+.register-input-icon {
+  flex-shrink: 0;
+  margin-left: 17px;
+
+  color: #9aacC4;
+}
+
+.register-input-wrapper input {
+  width: 100%;
+  min-width: 0;
+
+  border: none;
+  outline: none;
+
+  padding:
+    0 17px 0 13px;
+
+  background: transparent;
+
+  color: var(--ob-text);
+
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.register-input-wrapper input::placeholder,
+.register-phone-wrapper input::placeholder {
+  color: #a8b6cb;
+}
+
+/* ============================================================
+   PHONE
+   ============================================================ */
+
+.register-phone-wrapper {
+  overflow: hidden;
+}
+
+.register-country-code {
+  flex-shrink: 0;
+
+  padding: 0 16px;
+
+  color: var(--ob-blue);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.register-phone-divider {
+  width: 1px;
+  height: 30px;
+
+  background: #e0e6ef;
+}
+
+.register-phone-wrapper input {
+  width: 100%;
+  min-width: 0;
+
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  padding: 0 12px 0 16px;
+
+  background: transparent;
+
+  color: var(--ob-text);
+
+  font-family: inherit;
+  font-size: 15px;
+
+  letter-spacing: 1px;
+}
+
+.register-valid-mark {
+  flex-shrink: 0;
+
+  width: 24px;
+  height: 24px;
+
+  margin-right: 13px;
+
+  border-radius: 50%;
+
+  background: #18b98c;
+  color: var(--ob-white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-field-help {
+  margin: 8px 0 0;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  color: #91a2bb;
+}
+
+/* ============================================================
+   ROLE SELECTOR
+   ============================================================ */
+
+.role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role-card {
+  min-width: 0;
+
+  border: 1px solid #dce4ee;
+  border-radius: 15px;
+
+  background: var(--ob-white);
+
+  padding: 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  color: var(--ob-text);
+
+  font-family: inherit;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.role-card:hover {
+  transform: translateY(-1px);
+
+  border-color: #c8d5e5;
+
+  box-shadow:
+    0 8px 22px rgba(31, 49, 79, 0.06);
+}
+
+.role-card.selected {
+  border-color: var(--ob-red);
+
+  background: var(--ob-red-soft);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 58, 58, 0.06);
+}
+
+.role-icon {
+  flex-shrink: 0;
+
+  width: 39px;
+  height: 39px;
+
+  border-radius: 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--ob-background);
+  color: var(--ob-blue);
+}
+
+.role-card.selected .role-icon {
+  background: var(--ob-red-soft);
+  color: var(--ob-red);
+}
+
+.role-content {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.role-content strong {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.role-content span {
+  font-size: 10px;
+  line-height: 1.35;
+
+  color: #8c9bb1;
+}
+
+.role-radio {
+  flex-shrink: 0;
+
+  width: 19px;
+  height: 19px;
+
+  border-radius: 50%;
+
+  border: 1.5px solid #cbd7e5;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-card.selected .role-radio {
+  border-color: var(--ob-red);
+}
+
+.role-radio span {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: var(--ob-red);
+}
+
+/* ============================================================
+   TERMS
+   ============================================================ */
+
+.register-terms {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  color: #64748d;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.register-terms input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.register-checkbox {
+  flex-shrink: 0;
+
+  width: 24px;
+  height: 24px;
+
+  border-radius: 7px;
+
+  border: 1.5px solid #d3deeb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--ob-white);
+
+  background: var(--ob-white);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.register-terms.checked .register-checkbox {
+  border-color: var(--ob-red);
+  background: var(--ob-red);
+}
+
+.register-terms-text {
+  padding-top: 2px;
+}
+
+.register-terms-text button {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #243f68;
+
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  font: inherit;
+
+  cursor: pointer;
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.register-error {
+  margin: -8px 0 0;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  color: var(--ob-red-dark);
+}
+
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
+
+.register-primary-button {
+  width: 100%;
+  min-height: clamp(54px, 7vw, 64px);
+
+  border: none;
+  border-radius: 15px;
+
+  background: var(--ob-red);
+  color: var(--ob-white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 14px 28px rgba(255, 47, 47, 0.20);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.register-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 17px 34px rgba(255, 47, 47, 0.25);
+}
+
+.register-primary-button:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.register-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+
+  box-shadow: none;
+}
+
+.register-primary-button.loading {
+  opacity: 0.88;
+}
+
+.register-spinner {
+  animation: register-spin 0.8s linear infinite;
+}
+
+@keyframes register-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   LOGIN LINK
+   ============================================================ */
+
+.register-login-link {
+  margin-top: 22px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 12px;
+
+  color: var(--ob-text-light);
+}
+
+.register-login-link button {
+  border: none;
+  padding: 0;
+
+  background: transparent;
+
+  color: var(--ob-red);
+
+  font: inherit;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+/* ============================================================
+   OTP
+   ============================================================ */
+
+.otp-heading {
+  text-align: left;
+}
+
+.otp-phone {
+  margin-top: 7px;
+
+  color: var(--ob-blue);
+
+  font-size: 14px;
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+}
+
+.otp-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.otp-label {
+  margin-bottom: 10px;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  color: var(--ob-text);
+}
+
+.otp-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+
+  gap: clamp(7px, 1.8vw, 12px);
+}
+
+.otp-input {
+  width: 100%;
+  min-width: 0;
+
+  aspect-ratio: 0.82;
+
+  border: 1px solid #d7e0eb;
+  border-radius: 13px;
+
+  outline: none;
+
+  background: var(--ob-white);
+
+  color: var(--ob-text);
+
+  text-align: center;
+
+  font-family: inherit;
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 800;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.otp-input:focus {
+  border-color: var(--ob-red);
+
+  box-shadow:
+    0 0 0 4px rgba(255, 53, 53, 0.08);
+}
+
+.otp-error {
+  margin-top: 10px;
+}
+
+.otp-button {
+  margin-top: 20px;
+}
+
+.otp-actions {
+  margin-top: 18px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 12px;
+
+  color: var(--ob-text-light);
+}
+
+.otp-actions button {
+  border: none;
+  padding: 0;
+
+  background: transparent;
+
+  color: var(--ob-red);
+
+  font: inherit;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+.change-number-button {
+  align-self: center;
+
+  margin-top: 14px;
+
+  border: none;
+  padding: 0;
+
+  background: transparent;
+
+  color: var(--ob-blue);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.demo-otp-note {
+  margin: 20px auto 0;
+
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 11px;
+
+  border-radius: 9px;
+
+  background: var(--ob-background);
+
+  color: #8191a8;
+
+  font-size: 10px;
+}
+
+.demo-otp-note strong {
+  color: var(--ob-blue);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.register-safe-footer {
+  margin-top: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  color: #9aa8bc;
+
+  font-size: 10px;
+}
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 700px) {
+  .register-shell {
+    width: 100%;
+
+    padding-top: 74px;
+  }
+
+  .register-back-button {
+    top: 18px;
+    left: 18px;
+  }
+
+  .register-card {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 520px) {
+  .register-shell {
+    padding:
+      72px
+      12px
+      22px;
+  }
+
+  .register-brand {
+    margin-bottom: 22px;
+  }
+
+  .register-brand-mark {
+    width: 54px;
+    height: 54px;
+
+    border-radius: 17px;
+  }
+
+  .register-brand-name {
+    font-size: 28px;
+    letter-spacing: -1.3px;
+  }
+
+  .register-tagline {
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .register-accent {
+    margin-top: 9px;
+  }
+
+  .register-card {
+    padding:
+      22px
+      17px
+      25px;
+
+    border-radius: 21px;
+  }
+
+  .register-trust-badge {
+    font-size: 10px;
+    padding: 8px 10px;
+
+    margin-bottom: 18px;
+  }
+
+  .register-heading {
+    margin-bottom: 20px;
+  }
+
+  .register-heading h1 {
+    font-size: 24px;
+  }
+
+  .register-heading p {
+    font-size: 12px;
+    margin-top: 7px;
+  }
+
+  .register-form {
+    gap: 16px;
+  }
+
+  .register-field label,
+  .register-label-row label {
+    font-size: 12px;
+    margin-bottom: 7px;
+  }
+
+  .register-input-wrapper,
+  .register-phone-wrapper {
+    height: 52px;
+    border-radius: 13px;
+  }
+
+  .register-input-wrapper input,
+  .register-phone-wrapper input {
+    font-size: 13px;
+  }
+
+  .register-input-icon {
+    margin-left: 14px;
+  }
+
+  .register-country-code {
+    padding: 0 13px;
+    font-size: 13px;
+  }
+
+  .register-field-help {
+    font-size: 10px;
+    margin-top: 6px;
+  }
+
+  .role-options {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .role-card {
+    padding: 11px;
+    border-radius: 13px;
+  }
+
+  .role-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+  }
+
+  .role-content strong {
+    font-size: 12px;
+  }
+
+  .role-content span {
+    font-size: 9px;
+  }
+
+  .register-terms {
+    gap: 8px;
+    font-size: 10px;
+  }
+
+  .register-checkbox {
+    width: 21px;
+    height: 21px;
+    border-radius: 6px;
+  }
+
+  .register-primary-button {
+    min-height: 53px;
+    border-radius: 13px;
+    font-size: 14px;
+  }
+
+  .register-login-link {
+    margin-top: 17px;
+    font-size: 10px;
+  }
+
+  .otp-inputs {
+    gap: 6px;
+  }
+
+  .otp-input {
+    border-radius: 10px;
+    font-size: 19px;
+  }
+
+  .otp-actions {
+    font-size: 10px;
+  }
+
+  .change-number-button {
+    font-size: 10px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 360px) {
+  .register-shell {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .register-card {
+    padding:
+      19px
+      14px
+      22px;
+  }
+
+  .register-brand-name {
+    font-size: 25px;
+  }
+
+  .register-heading h1 {
+    font-size: 22px;
+  }
+
+  .register-form {
+    gap: 14px;
+  }
+
+  .role-card {
+    padding: 9px;
+  }
+
+  .role-content span {
+    font-size: 8px;
+  }
+
+  .register-primary-button {
+    min-height: 50px;
+  }
+}
+
+/* ============================================================
+   SHORT PHONES
+   ============================================================ */
+
+@media (max-height: 700px) and (max-width: 700px) {
+  .register-shell {
+    padding-top: 58px;
+  }
+
+  .register-brand {
+    transform: scale(0.88);
+    transform-origin: center bottom;
+
+    margin-bottom: 8px;
+  }
+
+  .register-card {
+    padding-top: 18px;
+  }
+
+  .register-trust-badge {
+    margin-bottom: 13px;
+  }
+
+  .register-heading {
+    margin-bottom: 15px;
+  }
+
+  .register-form {
+    gap: 12px;
+  }
+
+  .register-input-wrapper,
+  .register-phone-wrapper {
+    height: 48px;
+  }
+
+  .role-card {
+    padding: 9px;
+  }
+
+  .register-primary-button {
+    min-height: 48px;
+  }
+
+  .register-login-link {
+    margin-top: 12px;
+  }
+
+  .register-safe-footer {
+    margin-top: 8px;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .register-page *,
+  .register-page *::before,
+  .register-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

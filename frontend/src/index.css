@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   OUTBROKER — GLOBAL DESIGN TOKENS
+   Single source of truth for color, radius, shadow and type
+   so every page (Home, Login, Register, Verification,
+   Property Details, Add Property) reads as one product.
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --ob-red: #ef2b2d;
+  --ob-red-dark: #d91f24;
+  --ob-red-soft: #fff0f0;
+
+  --ob-blue: #173f78;
+  --ob-blue-dark: #102f5c;
+
+  --ob-green: #00a878;
+  --ob-green-soft: #e6f7f1;
+
+  /* Text */
+  --ob-text: #14213d;
+  --ob-text-soft: #6b7a94;
+  --ob-text-light: #99a6ba;
+
+  /* Surfaces */
+  --ob-border: #dfe4ec;
+  --ob-border-soft: #ebeef4;
+  --ob-white: #ffffff;
+  --ob-background: #f7f8fb;
+
+  /* Elevation */
+  --ob-shadow-sm: 0 6px 18px rgba(20, 33, 61, 0.06);
+  --ob-shadow-md: 0 14px 34px rgba(20, 33, 61, 0.09);
+  --ob-shadow-lg: 0 24px 60px rgba(20, 33, 61, 0.12);
+
+  /* Radius scale */
+  --ob-radius-sm: 10px;
+  --ob-radius-md: 14px;
+  --ob-radius-lg: 20px;
+  --ob-radius-full: 999px;
+
+  /* Spacing rhythm */
+  --ob-space-xs: 6px;
+  --ob-space-sm: 12px;
+  --ob-space-md: 20px;
+  --ob-space-lg: 32px;
+  --ob-space-xl: 48px;
+
+  /* Type */
+  --ob-font:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--ob-font);
+  background: var(--ob-background);
+  color: var(--ob-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ob-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

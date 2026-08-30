@@ -1,0 +1,156 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--ob-background);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  background: var(--ob-white);
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 12px 40px rgba(30, 35, 60, 0.08);
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.login-brand h1 {
+  margin: 0;
+  color: var(--ob-text);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.login-brand p {
+  margin: 4px 0 0;
+  color: var(--ob-text-soft);
+  font-size: 13px;
+}
+
+.login-heading {
+  margin-bottom: 28px;
+}
+
+.login-heading h2 {
+  margin: 0 0 8px;
+  color: var(--ob-text-soft);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.login-heading p {
+  margin: 0;
+  color: var(--ob-text-soft);
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--ob-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ob-border);
+  border-radius: 12px;
+  padding: 14px 15px;
+  outline: none;
+  background: var(--ob-white);
+  color: var(--ob-text);
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: var(--ob-red);
+  box-shadow: 0 0 0 3px rgba(231, 53, 43, 0.1);
+}
+
+.form-group input::placeholder {
+  color: var(--ob-text-light);
+}
+
+.password-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-password {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--ob-red-dark);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.login-button {
+  margin-top: 4px;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  background: var(--ob-red);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.login-button:hover {
+  opacity: 0.92;
+}
+
+.login-button:active {
+  transform: scale(0.98);
+}
+
+.signup-text {
+  margin-top: 28px;
+  text-align: center;
+  color: var(--ob-text-soft);
+  font-size: 14px;
+}
+
+.signup-text button {
+  margin-left: 5px;
+  border: none;
+  background: transparent;
+  color: var(--ob-red-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 32px 22px;
+    border-radius: 20px;
+    box-shadow: none;
+  }
+}
