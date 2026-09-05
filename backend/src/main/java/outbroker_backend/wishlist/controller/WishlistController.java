@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import outbroker_backend.common.dto.ApiResponse;
 import outbroker_backend.common.exception.UnauthorizedAccessException;
 import outbroker_backend.wishlist.dto.WishlistExistsResponse;
 import outbroker_backend.wishlist.dto.WishlistResponse;
@@ -25,41 +26,47 @@ public class WishlistController {
 
     @PostMapping("/{propertyId}")
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
-    public ResponseEntity<WishlistResponse> addToWishlist(
+    public ResponseEntity<ApiResponse<WishlistResponse>> addToWishlist(
             Authentication authentication,
             @PathVariable UUID propertyId) {
+
         UUID tenantId = extractUserId(authentication);
+        WishlistResponse response = wishlistService.addToWishlist(tenantId, propertyId);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(wishlistService.addToWishlist(tenantId, propertyId));
+                .body(ApiResponse.success("Property added to wishlist successfully", response));
     }
 
     @DeleteMapping("/{propertyId}")
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
-    public ResponseEntity<Void> removeFromWishlist(
+    public ResponseEntity<ApiResponse<Void>> removeFromWishlist(
             Authentication authentication,
             @PathVariable UUID propertyId) {
+
         UUID tenantId = extractUserId(authentication);
         wishlistService.removeFromWishlist(tenantId, propertyId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Property removed from wishlist successfully", null));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
-    public ResponseEntity<Page<WishlistResponse>> getTenantWishlist(
+    public ResponseEntity<ApiResponse<Page<WishlistResponse>>> getTenantWishlist(
             Authentication authentication,
             @PageableDefault(size = 10) Pageable pageable) {
+
         UUID tenantId = extractUserId(authentication);
-        return ResponseEntity.ok(wishlistService.getTenantWishlist(tenantId, pageable));
+        Page<WishlistResponse> wishlist = wishlistService.getTenantWishlist(tenantId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Wishlist retrieved successfully", wishlist));
     }
 
     @GetMapping("/{propertyId}/exists")
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
-    public ResponseEntity<WishlistExistsResponse> checkWishlistExists(
+    public ResponseEntity<ApiResponse<WishlistExistsResponse>> checkWishlistExists(
             Authentication authentication,
             @PathVariable UUID propertyId) {
+
         UUID tenantId = extractUserId(authentication);
         boolean exists = wishlistService.existsInWishlist(tenantId, propertyId);
-        return ResponseEntity.ok(new WishlistExistsResponse(exists));
+        return ResponseEntity.ok(ApiResponse.success("Wishlist status checked successfully", new WishlistExistsResponse(exists)));
     }
 
     private UUID extractUserId(Authentication authentication) {

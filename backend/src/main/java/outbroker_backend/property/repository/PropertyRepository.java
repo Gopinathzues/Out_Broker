@@ -16,4 +16,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID>, JpaSp
     List<Property> findByCityAndStatus(String city, PropertyStatus status);
 
     List<Property> findByStatus(PropertyStatus status);
+
+    List<Property> findByOwnerId(UUID ownerId);
 }

@@ -73,10 +73,9 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Property> getPropertiesByOwner(UUID ownerId) {
-
-        return propertyRepository.findById(ownerId);
-    }
+public List<Property> getPropertiesByOwner(UUID ownerId) {
+    return propertyRepository.findByOwnerId(ownerId);
+}
 
     // =========================================================
     // PROPERTY SEARCH / FILTER

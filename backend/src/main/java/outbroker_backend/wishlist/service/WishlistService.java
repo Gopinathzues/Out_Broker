@@ -62,15 +62,14 @@ public class WishlistService {
     }
 
     private WishlistResponse mapToResponse(Wishlist wishlist) {
-    Property property = wishlist.getProperty();
+        Property property = wishlist.getProperty();
+        PropertyResponse propertyDto = new PropertyResponse(property);
 
-    PropertyResponse propertyDto = new PropertyResponse(property);
-
-    return WishlistResponse.builder()
-            .id(wishlist.getId())
-            .tenantId(wishlist.getTenantId())
-            .property(propertyDto)
-            .createdAt(wishlist.getCreatedAt())
-            .build();
-}
+        return WishlistResponse.builder()
+                .id(wishlist.getId())
+                .tenantId(wishlist.getTenantId())
+                .property(propertyDto)
+                .createdAt(wishlist.getCreatedAt())
+                .build();
+    }
 }

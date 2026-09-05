@@ -113,6 +113,24 @@ public class PropertyController {
         return ResponseEntity.ok(ApiResponse.success("Property details retrieved successfully", new PropertyResponse(property)));
     }
 
+    @GetMapping("/owner/{ownerId}")
+public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
+        @PathVariable UUID ownerId) {
+
+    List<PropertyResponse> properties = propertyService
+            .getPropertiesByOwner(ownerId)
+            .stream()
+            .map(PropertyResponse::new)
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(
+            ApiResponse.success(
+                    "Owner properties retrieved successfully",
+                    properties
+            )
+    );
+}
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
     public ResponseEntity<ApiResponse<PropertyResponse>> updateProperty(
