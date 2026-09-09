@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -18,6 +18,13 @@ import {
   Sofa,
   Users,
 } from "lucide-react";
+import {
+  isPropertySaved,
+  toggleSavedProperty,
+} from "../data/propertyStore";
+
+import { useAuth } from "../context/AuthContext";
+
 import "./PropertyDetails.css";
 
 type VerificationLevel = "fully" | "document" | "basic";
@@ -264,6 +271,7 @@ function getVerification(level: VerificationLevel) {
 function PropertyDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const property = useMemo(() => {
     const propertyId = Number(id);
@@ -274,21 +282,27 @@ function PropertyDetails() {
   }, [id]);
 
   const [activePhoto, setActivePhoto] = useState(0);
-  const [isSaved, setIsSaved] = useState(() => {
-    const saved = localStorage.getItem("outbroker_favorites");
 
-    if (!saved) return false;
-
-    try {
-      const favorites: number[] = JSON.parse(saved);
-      return favorites.includes(property.id);
-    } catch {
-      return false;
-    }
-  });
+  /*
+   * Connected to the shared propertyStore (same one used by
+   * Home, Map and Saved) so a property saved here shows up
+   * as saved everywhere else, and vice versa.
+   */
+  const [isSaved, setIsSaved] = useState(() =>
+    isPropertySaved(property.id)
+  );
 
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showContactMessage, setShowContactMessage] = useState(false);
+
+  /*
+   * Re-check the saved state whenever the viewed property
+   * changes (e.g. navigating from one property's page to
+   * another without unmounting this component).
+   */
+  useEffect(() => {
+    setIsSaved(isPropertySaved(property.id));
+  }, [property.id]);
 
   const verification = getVerification(property.verification);
 
@@ -297,30 +311,34 @@ function PropertyDetails() {
     : property.amenities.slice(0, 4);
 
   const updateSavedState = () => {
-    const stored = localStorage.getItem("outbroker_favorites");
-
-    let favorites: number[] = [];
-
-    if (stored) {
-      try {
-        favorites = JSON.parse(stored);
-      } catch {
-        favorites = [];
-      }
+    /*
+     * Guests can browse property details freely, but
+     * saving a property requires an account.
+     */
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
     }
 
-    if (favorites.includes(property.id)) {
-      favorites = favorites.filter((item) => item !== property.id);
-    } else {
-      favorites.push(property.id);
-    }
+    const updated = toggleSavedProperty({
+      id: property.id,
+      title: property.title,
+      category: property.category,
+      location: `${property.area}, Chennai`,
+      price: property.priceValue,
+      priceLabel: `${property.price} / month`,
+      bhk: property.bhk,
+      area: property.sqft ?? "",
+      furnishing: property.furnish,
+      verified: property.verification === "fully",
+      image: property.photos[0],
+    });
 
-    localStorage.setItem(
-      "outbroker_favorites",
-      JSON.stringify(favorites)
+    setIsSaved(
+      updated.some(
+        (item) => String(item.id) === String(property.id)
+      )
     );
-
-    setIsSaved(favorites.includes(property.id));
   };
 
   const previousPhoto = () => {
@@ -336,6 +354,16 @@ function PropertyDetails() {
   };
 
   const handleContact = () => {
+    /*
+     * Contacting an owner requires an account, so their
+     * details are tied to a real profile rather than an
+     * anonymous guest session.
+     */
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     setShowContactMessage(true);
   };
 
@@ -711,7 +739,7 @@ function PropertyDetails() {
         <button
           className="contact-secondary"
           type="button"
-          onClick={() => setShowContactMessage(true)}
+          onClick={handleContact}
         >
           <MessageCircle size={20} strokeWidth={2} />
           <span>Chat</span>

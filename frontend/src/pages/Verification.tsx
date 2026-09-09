@@ -1,10 +1,9 @@
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  ArrowUp,
   Camera,
   Check,
   CheckCircle2,
@@ -15,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import CameraCapture from "../components/CameraCapture";
 import "./Verification.css";
 
 type VerificationStep = 1 | 2 | 3 | 4;
@@ -92,43 +92,19 @@ function Verification() {
   const [currentStep, setCurrentStep] =
     useState<VerificationStep>(1);
 
-  const [documentFile, setDocumentFile] =
-    useState<File | null>(null);
+  const [documentPhoto, setDocumentPhoto] =
+    useState<string | null>(null);
 
-  const [selfieFile, setSelfieFile] =
-    useState<File | null>(null);
+  const [selfiePhoto, setSelfiePhoto] =
+    useState<string | null>(null);
 
-  const [proofFile, setProofFile] =
-    useState<File | null>(null);
+  const [proofPhoto, setProofPhoto] =
+    useState<string | null>(null);
 
   const [locationConfirmed, setLocationConfirmed] =
     useState(false);
 
   const [error, setError] = useState("");
-
-  const handleDocumentChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0] ?? null;
-    setDocumentFile(file);
-    setError("");
-  };
-
-  const handleSelfieChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0] ?? null;
-    setSelfieFile(file);
-    setError("");
-  };
-
-  const handleProofChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0] ?? null;
-    setProofFile(file);
-    setError("");
-  };
 
   const goBack = () => {
     if (currentStep > 1) {
@@ -154,18 +130,18 @@ function Verification() {
   const continueStep = () => {
     setError("");
 
-    if (currentStep === 1 && !documentFile) {
-      setError("Please upload your identity document.");
+    if (currentStep === 1 && !documentPhoto) {
+      setError("Please capture a photo of your identity document.");
       return;
     }
 
-    if (currentStep === 2 && !selfieFile) {
-      setError("Please upload your verification selfie.");
+    if (currentStep === 2 && !selfiePhoto) {
+      setError("Please capture your verification selfie.");
       return;
     }
 
-    if (currentStep === 3 && !proofFile) {
-      setError("Please upload your property ownership proof.");
+    if (currentStep === 3 && !proofPhoto) {
+      setError("Please capture your property ownership proof.");
       return;
     }
 
@@ -225,35 +201,16 @@ function Verification() {
               </span>
             </div>
 
-            <label
-              htmlFor="document-upload"
-              className={`upload-box ${
-                documentFile ? "has-file" : ""
-              }`}
-            >
-              <span className="upload-icon">
-                {documentFile ? <Check size={19} strokeWidth={2.6} /> : <ArrowUp size={19} strokeWidth={2.2} />}
-              </span>
-
-              <span className="upload-content">
-                <strong>
-                  {documentFile
-                    ? documentFile.name
-                    : "Upload document"}
-                </strong>
-
-                <small>
-                  JPG, PNG or PDF
-                </small>
-              </span>
-
-              <input
-                id="document-upload"
-                type="file"
-                accept=".jpg,.jpeg,.png,.pdf"
-                onChange={handleDocumentChange}
-              />
-            </label>
+            <CameraCapture
+              value={documentPhoto}
+              onCapture={(dataUrl) => {
+                setDocumentPhoto(dataUrl);
+                setError("");
+              }}
+              facingMode="environment"
+              triggerLabel="Capture document"
+              description="Use your back camera to photograph it"
+            />
 
             <p className="upload-note">
               Make sure the name on the document matches
@@ -288,35 +245,16 @@ function Verification() {
               </span>
             </div>
 
-            <label
-              htmlFor="selfie-upload"
-              className={`upload-box ${
-                selfieFile ? "has-file" : ""
-              }`}
-            >
-              <span className="upload-icon">
-                {selfieFile ? <Check size={19} strokeWidth={2.6} /> : <ArrowUp size={19} strokeWidth={2.2} />}
-              </span>
-
-              <span className="upload-content">
-                <strong>
-                  {selfieFile
-                    ? selfieFile.name
-                    : "Upload selfie"}
-                </strong>
-
-                <small>
-                  JPG or PNG
-                </small>
-              </span>
-
-              <input
-                id="selfie-upload"
-                type="file"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleSelfieChange}
-              />
-            </label>
+            <CameraCapture
+              value={selfiePhoto}
+              onCapture={(dataUrl) => {
+                setSelfiePhoto(dataUrl);
+                setError("");
+              }}
+              facingMode="user"
+              triggerLabel="Capture selfie"
+              description="Use your front camera, face centered"
+            />
           </>
         );
 
@@ -347,35 +285,16 @@ function Verification() {
               </span>
             </div>
 
-            <label
-              htmlFor="proof-upload"
-              className={`upload-box ${
-                proofFile ? "has-file" : ""
-              }`}
-            >
-              <span className="upload-icon">
-                {proofFile ? <Check size={19} strokeWidth={2.6} /> : <ArrowUp size={19} strokeWidth={2.2} />}
-              </span>
-
-              <span className="upload-content">
-                <strong>
-                  {proofFile
-                    ? proofFile.name
-                    : "Upload ownership proof"}
-                </strong>
-
-                <small>
-                  JPG, PNG or PDF
-                </small>
-              </span>
-
-              <input
-                id="proof-upload"
-                type="file"
-                accept=".jpg,.jpeg,.png,.pdf"
-                onChange={handleProofChange}
-              />
-            </label>
+            <CameraCapture
+              value={proofPhoto}
+              onCapture={(dataUrl) => {
+                setProofPhoto(dataUrl);
+                setError("");
+              }}
+              facingMode="environment"
+              triggerLabel="Capture ownership proof"
+              description="Use your back camera to photograph it"
+            />
           </>
         );
 

@@ -1,0 +1,407 @@
+/* =========================================================
+   SPLASH SCREEN
+   Uses the same design tokens defined in index.css so it
+   reads as the same product as every other page — never
+   introduces its own colors.
+========================================================= */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 10% 8%,
+      rgba(239, 43, 45, 0.08),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 92% 90%,
+      rgba(23, 63, 120, 0.08),
+      transparent 34%
+    ),
+    var(--ob-background);
+
+  color: var(--ob-text);
+  font-family: var(--ob-font);
+
+  animation: splash-fade-in 0.4s ease-out;
+}
+
+/* =========================================================
+   DECORATIVE BACKGROUND
+========================================================= */
+
+.splash-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.splash-orb-one {
+  width: 260px;
+  height: 260px;
+  left: -110px;
+  top: -100px;
+  background: rgba(239, 43, 45, 0.07);
+}
+
+.splash-orb-two {
+  width: 320px;
+  height: 320px;
+  right: -140px;
+  bottom: -130px;
+  background: rgba(23, 63, 120, 0.06);
+}
+
+.splash-grid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      var(--ob-border-soft) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      var(--ob-border-soft) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+
+  opacity: 0.35;
+
+  mask-image: radial-gradient(
+    circle at 50% 40%,
+    black,
+    transparent 68%
+  );
+
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 40%,
+    black,
+    transparent 68%
+  );
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.splash-content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+  padding: 0 24px;
+
+  animation: splash-content-in 0.7s
+    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =========================================================
+   BRAND MARK
+   Same visual language as .home-brand-mark in Home.css —
+   red-soft rounded square with the red Home icon — just
+   scaled up, with a verified badge to lead with trust.
+========================================================= */
+
+.splash-mark-wrap {
+  position: relative;
+
+  margin-bottom: 22px;
+
+  animation: splash-mark-in 0.8s
+    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.splash-mark {
+  width: 84px;
+  height: 84px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: var(--ob-radius-lg);
+
+  background: var(--ob-red-soft);
+  color: var(--ob-red);
+
+  box-shadow: var(--ob-shadow-md);
+}
+
+.splash-mark-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: var(--ob-radius-full);
+
+  background: var(--ob-green);
+  color: var(--ob-white);
+
+  border: 3px solid var(--ob-background);
+
+  box-shadow: var(--ob-shadow-sm);
+}
+
+/* =========================================================
+   WORDMARK
+========================================================= */
+
+.splash-brand {
+  margin: 0;
+
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -1.4px;
+  line-height: 1;
+}
+
+.splash-brand-out {
+  color: var(--ob-red);
+}
+
+.splash-brand-broker {
+  color: var(--ob-blue);
+}
+
+.splash-subtitle {
+  margin: 10px 0 0;
+
+  color: var(--ob-text-soft);
+
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   TRUST STRIP
+   The differentiator called out for OutBroker — verification
+   — surfaced immediately, before the product even loads.
+========================================================= */
+
+.splash-trust-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.splash-trust-strip li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 12px;
+
+  border-radius: var(--ob-radius-full);
+  border: 1px solid var(--ob-border);
+  background: rgba(255, 255, 255, 0.7);
+
+  color: var(--ob-text-soft);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.splash-trust-strip li:nth-child(1) {
+  color: var(--ob-red);
+  border-color: var(--ob-red-soft);
+  background: var(--ob-red-soft);
+}
+
+.splash-trust-strip li:nth-child(2) {
+  color: var(--ob-blue);
+  border-color: #e6ecf7;
+  background: #eef3fc;
+}
+
+.splash-trust-strip li:nth-child(3) {
+  color: var(--ob-green);
+  border-color: var(--ob-green-soft);
+  background: var(--ob-green-soft);
+}
+
+/* =========================================================
+   PROGRESS / LOADING
+========================================================= */
+
+.splash-progress {
+  width: 148px;
+  height: 4px;
+
+  margin-top: 40px;
+
+  border-radius: var(--ob-radius-full);
+  background: var(--ob-border-soft);
+
+  overflow: hidden;
+}
+
+.splash-progress-fill {
+  display: block;
+  height: 100%;
+  width: 40%;
+
+  border-radius: var(--ob-radius-full);
+
+  background: linear-gradient(
+    90deg,
+    var(--ob-red),
+    var(--ob-blue)
+  );
+
+  animation: splash-progress-slide 1.15s ease-in-out infinite;
+}
+
+.splash-loading-text {
+  margin: 10px 0 0;
+
+  color: var(--ob-text-light);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   TAGLINE
+========================================================= */
+
+.splash-tagline {
+  position: absolute;
+  z-index: 2;
+
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+
+  margin: 0;
+
+  color: var(--ob-text-light);
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes splash-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splash-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-mark-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes splash-progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(120%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+  .splash-brand {
+    font-size: 32px;
+  }
+
+  .splash-mark {
+    width: 74px;
+    height: 74px;
+  }
+
+  .splash-trust-strip {
+    gap: 8px;
+  }
+
+  .splash-trust-strip li {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .splash-tagline {
+    bottom: 22px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen,
+  .splash-content,
+  .splash-mark-wrap,
+  .splash-progress-fill {
+    animation: none;
+  }
+
+  .splash-progress-fill {
+    width: 60%;
+  }
+}

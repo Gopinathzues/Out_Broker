@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   BrowserRouter,
   Navigate,
@@ -5,56 +7,187 @@ import {
   Routes,
 } from "react-router-dom";
 
+
+/* =========================================================
+   COMPONENTS
+========================================================= */
+
+import SplashScreen from "./components/SplashScreen";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+
+/* =========================================================
+   PAGES
+========================================================= */
+
 import Home from "./pages/Home";
 import Login from "./pages/login";
+import Map from "./pages/Map";
 import Register from "./pages/Register";
+import Saved from "./pages/Saved";
 import Verification from "./pages/Verification";
 import PropertyDetails from "./pages/PropertyDetails";
 import AddProperty from "./pages/AddProperty";
+import MyAccount from "./pages/MyAccount";
+import NotFound from "./pages/NotFound";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+import { useAuth } from "./context/AuthContext";
+
 
 function App() {
+
+  const [showSplash, setShowSplash] =
+    useState(true);
+
+  const { isAuthenticated } =
+    useAuth();
+
+
+  /* =======================================================
+     SPLASH SCREEN
+  ======================================================== */
+
+  if (showSplash) {
+    return (
+      <SplashScreen
+        onComplete={() =>
+          setShowSplash(false)
+        }
+      />
+    );
+  }
+
+
+  /* =======================================================
+     APPLICATION ROUTES
+  ======================================================== */
+
   return (
     <BrowserRouter>
+
       <Routes>
 
-        {/* =====================================================
+
+        {/* =================================================
             APPLICATION ENTRY
-        ===================================================== */}
+        ================================================== */}
 
         <Route
           path="/"
           element={
             <Navigate
-              to="/home"
+              to={
+                isAuthenticated
+                  ? "/home"
+                  : "/register"
+              }
               replace
             />
           }
         />
 
-        {/* =====================================================
-            PUBLIC AUTHENTICATION
-        ===================================================== */}
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        {/* =================================================
+            PUBLIC AUTHENTICATION
+        ================================================== */}
 
         <Route
           path="/register"
-          element={<Register />}
+          element={
+            <Register />
+          }
         />
 
-        {/* =====================================================
-            PUBLIC PROPERTY DISCOVERY
-        ===================================================== */}
+        <Route
+          path="/login"
+          element={
+            <Login />
+          }
+        />
+
+
+        {/* =================================================
+            HOME
+
+            Home remains publicly accessible.
+
+            Guests can browse properties.
+        ================================================== */}
 
         <Route
           path="/home"
-          element={<Home />}
+          element={
+            <Home />
+          }
         />
+
+
+        {/* =================================================
+            MAP
+
+            Map remains publicly accessible.
+        ================================================== */}
+
+        <Route
+          path="/map"
+          element={
+            <Map />
+          }
+        />
+
+
+        {/* =================================================
+            SAVED
+
+            Authentication required.
+        ================================================== */}
+
+        <Route
+          path="/saved"
+          element={
+            isAuthenticated ? (
+              <Saved />
+            ) : (
+              <Navigate
+                to="/login"
+                replace
+              />
+            )
+          }
+        />
+
+
+        {/* =================================================
+            MY ACCOUNT
+
+            Authentication required.
+        ================================================== */}
+
+        <Route
+          path="/account"
+          element={
+            isAuthenticated ? (
+              <MyAccount />
+            ) : (
+              <Navigate
+                to="/login"
+                replace
+              />
+            )
+          }
+        />
+
+
+        {/* =================================================
+            PROPERTY DETAILS
+
+            Publicly accessible.
+        ================================================== */}
 
         <Route
           path="/properties/:id"
@@ -63,22 +196,12 @@ function App() {
           }
         />
 
-        {/* =====================================================
+
+        {/* =================================================
             OWNER VERIFICATION
-        =====================================================
 
-            Requirements:
-
-            - Authenticated
-            - LANDLORD
-
-            IMPORTANT:
-
-            FULLY_VERIFIED is NOT required here.
-
-            An already verified owner can still open
-            this page and view their verification state.
-        ===================================================== */}
+            LANDLORD only.
+        ================================================== */}
 
         <Route
           path="/verification"
@@ -93,16 +216,12 @@ function App() {
           }
         />
 
-        {/* =====================================================
+
+        {/* =================================================
             ADD PROPERTY
-        =====================================================
 
-            Requirements:
-
-            1. Authenticated
-            2. LANDLORD
-            3. FULLY_VERIFIED
-        ===================================================== */}
+            LANDLORD + FULLY VERIFIED.
+        ================================================== */}
 
         <Route
           path="/add-property"
@@ -118,17 +237,17 @@ function App() {
           }
         />
 
-        {/* =====================================================
-            LEGACY / MISTYPED CASING COMPATIBILITY
-        =====================================================
 
-            /verification is the ONLY canonical route.
+        {/* =================================================
+            LEGACY VERIFICATION URL
 
-            This redirect exists purely so that an old bookmark
-            or a mistyped URL does not 404 or render a second,
-            duplicate verification page. There is only ONE
-            Verification component/page in this app.
-        ===================================================== */}
+            Supports both:
+
+            /verification
+            /Verification
+
+            without maintaining two pages.
+        ================================================== */}
 
         <Route
           path="/Verification"
@@ -140,23 +259,27 @@ function App() {
           }
         />
 
-        {/* =====================================================
-            UNKNOWN ROUTES
-        ===================================================== */}
+
+        {/* =================================================
+            404 / PAGE NOT FOUND
+
+            Instead of silently redirecting to Home,
+            show the proper frontend error state.
+        ================================================== */}
 
         <Route
           path="*"
           element={
-            <Navigate
-              to="/home"
-              replace
-            />
+            <NotFound />
           }
         />
 
+
       </Routes>
+
     </BrowserRouter>
   );
 }
+
 
 export default App;

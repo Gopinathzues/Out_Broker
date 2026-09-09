@@ -6,62 +6,90 @@
  * Frontend-only saved/favorite implementation.
  *
  * IMPORTANT:
- * This is intentionally isolated from the property model.
- * When the backend is connected, this section can be replaced
- * with favorite API calls without changing the Saved page UI.
+ * This is intentionally isolated from the main property store.
+ *
+ * Later, when the backend is connected, these functions can be
+ * replaced with API calls without changing the Home or Saved UI.
  */
 
 export interface SavedProperty {
   id: string | number;
+
   title: string;
+
   category: string;
+
   location: string;
+
   price?: number;
+
   priceLabel: string;
+
   bhk?: string;
+
   area: string;
+
   furnishing?: string;
+
   verified?: boolean;
+
   featured?: boolean;
+
   image: string;
 }
+
 
 const SAVED_PROPERTIES_KEY =
   "outbroker_saved_properties";
 
+
 /*
- * Read saved properties.
+ * ============================================================
+ * GET SAVED PROPERTIES
+ * ============================================================
  */
+
 export function getSavedProperties(): SavedProperty[] {
   if (typeof window === "undefined") {
     return [];
   }
 
-  const stored =
-    localStorage.getItem(
-      SAVED_PROPERTIES_KEY
-    );
-
-  if (!stored) {
-    return [];
-  }
-
   try {
-    const parsed = JSON.parse(stored);
+    const stored =
+      localStorage.getItem(
+        SAVED_PROPERTIES_KEY
+      );
+
+    if (!stored) {
+      return [];
+    }
+
+    const parsed =
+      JSON.parse(stored);
 
     if (!Array.isArray(parsed)) {
       return [];
     }
 
     return parsed as SavedProperty[];
-  } catch {
+
+  } catch (error) {
+    console.error(
+      "Unable to read saved properties:",
+      error
+    );
+
     return [];
   }
 }
 
+
 /*
- * Check whether a property is saved.
+ * ============================================================
+ * CHECK SAVED STATE
+ * ============================================================
  */
+
 export function isPropertySaved(
   propertyId: string | number
 ): boolean {
@@ -72,14 +100,17 @@ export function isPropertySaved(
   );
 }
 
+
 /*
- * Save a property.
- *
- * If the property is already saved, it will not be duplicated.
+ * ============================================================
+ * SAVE PROPERTY
+ * ============================================================
  */
+
 export function saveProperty(
   property: SavedProperty
 ): SavedProperty[] {
+
   const current =
     getSavedProperties();
 
@@ -107,12 +138,17 @@ export function saveProperty(
   return updated;
 }
 
+
 /*
- * Remove a saved property.
+ * ============================================================
+ * REMOVE PROPERTY
+ * ============================================================
  */
+
 export function removeSavedProperty(
   propertyId: string | number
 ): SavedProperty[] {
+
   const current =
     getSavedProperties();
 
@@ -131,12 +167,17 @@ export function removeSavedProperty(
   return updated;
 }
 
+
 /*
- * Toggle saved state.
+ * ============================================================
+ * TOGGLE PROPERTY
+ * ============================================================
  */
+
 export function toggleSavedProperty(
   property: SavedProperty
 ): SavedProperty[] {
+
   if (
     isPropertySaved(property.id)
   ) {
@@ -148,12 +189,20 @@ export function toggleSavedProperty(
   return saveProperty(property);
 }
 
+
 /*
- * Clear all saved properties.
+ * ============================================================
+ * CLEAR SAVED PROPERTIES
+ * ============================================================
  *
- * Useful for development/testing.
+ * Development/testing only.
  */
+
 export function clearSavedProperties(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   localStorage.removeItem(
     SAVED_PROPERTIES_KEY
   );

@@ -1,4 +1,5 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import {
   ArrowLeft,
   Camera,
@@ -15,7 +16,6 @@ import {
   ShieldCheck,
   Store,
   Upload,
-  UserRound,
   Building2,
   Users,
 } from "lucide-react";

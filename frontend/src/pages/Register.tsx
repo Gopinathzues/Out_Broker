@@ -8,7 +8,8 @@ import {
   UserRound,
   Building2,
 } from "lucide-react";
-import { FormEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import type { FormEvent } from "react";
 import {
   useLocation,
   useNavigate,
@@ -248,6 +249,11 @@ function Register() {
 
     setOtpError("");
     setLoading(true);
+
+    if (!role) {
+      setLoading(false);
+      return;
+    }
 
     setTimeout(() => {
       setLoading(false);
