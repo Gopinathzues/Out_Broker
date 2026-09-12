@@ -1,13 +1,13 @@
 package outbroker_backend.common.enums;
 
 public enum PropertyType {
+    HOUSE,
     APARTMENT,
-    INDEPENDENT_HOUSE,
     VILLA,
-    PG,
-    HOSTEL,
     OFFICE,
     SHOP,
-    PLOT_LAND,
+    HOSTEL,
+    PG,
+    LAND_PLOT,
     OTHER
 }

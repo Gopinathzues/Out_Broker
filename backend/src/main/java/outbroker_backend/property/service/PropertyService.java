@@ -66,7 +66,7 @@ public class PropertyService {
             property.setTenantPreference(TenantPreference.ANY);
         }
         if (property.getStatus() == null) {
-            property.setStatus(PropertyStatus.ACTIVE);
+            property.setStatus(PropertyStatus.AVAILABLE);
         }
         property.setLastRefreshedAt(LocalDateTime.now());
 
@@ -82,7 +82,7 @@ public class PropertyService {
 
         return propertyRepository.findByCityAndStatus(
                 city,
-                PropertyStatus.ACTIVE
+                PropertyStatus.AVAILABLE
         );
     }
 
@@ -117,7 +117,7 @@ public class PropertyService {
             double radiusKm) {
 
         return propertyRepository
-                .findByStatus(PropertyStatus.ACTIVE)
+                .findByStatus(PropertyStatus.AVAILABLE)
                 .stream()
                 .filter(property -> {
 

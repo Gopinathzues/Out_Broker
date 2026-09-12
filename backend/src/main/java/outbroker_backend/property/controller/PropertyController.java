@@ -204,15 +204,38 @@ public class PropertyController {
 
         Property updatedDetails = new Property();
 
+        // Core fields
         updatedDetails.setTitle(request.getTitle());
         updatedDetails.setDescription(request.getDescription());
         updatedDetails.setMonthlyRent(request.getMonthlyRent());
         updatedDetails.setSecurityDeposit(request.getSecurityDeposit());
+        updatedDetails.setMaintenanceFee(request.getMaintenanceFee());
+
+        // Domain specifications
         updatedDetails.setPropertyType(request.getPropertyType());
+        updatedDetails.setTransactionType(request.getTransactionType());
+        updatedDetails.setFurnishingStatus(request.getFurnishingStatus());
+        updatedDetails.setTenantPreference(request.getTenantPreference());
+
+        // Physical parameters
         updatedDetails.setBedrooms(request.getBedrooms());
         updatedDetails.setBathrooms(request.getBathrooms());
+        updatedDetails.setPropertyAgeYears(request.getPropertyAgeYears());
+        updatedDetails.setFloorNumber(request.getFloorNumber());
+        updatedDetails.setTotalFloors(request.getTotalFloors());
+        updatedDetails.setFacingDirection(request.getFacingDirection());
+        updatedDetails.setParkingSpaces(request.getParkingSpaces());
+
+        // Location & Availability
         updatedDetails.setCity(request.getCity());
         updatedDetails.setAddress(request.getAddress());
+        updatedDetails.setLandmark(request.getLandmark());
+        updatedDetails.setLatitude(request.getLatitude());
+        updatedDetails.setLongitude(request.getLongitude());
+        updatedDetails.setAvailabilityDate(request.getAvailabilityDate());
+
+        // Amenities
+        updatedDetails.setAmenities(request.getAmenities());
 
         Property updatedProperty =
                 propertyService.updateProperty(
