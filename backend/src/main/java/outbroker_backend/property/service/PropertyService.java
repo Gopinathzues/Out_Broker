@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import outbroker_backend.common.enums.PropertyStatus;
+import outbroker_backend.common.enums.TenantPreference;
+import outbroker_backend.common.enums.TransactionType;
 import outbroker_backend.common.enums.UserRole;
 import outbroker_backend.common.enums.VerificationStatus;
 import outbroker_backend.property.dto.PropertyResponse;
@@ -14,8 +16,8 @@ import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.property.specification.PropertySpecification;
 import outbroker_backend.user.entity.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -56,6 +58,18 @@ public class PropertyService {
         // Always assign the authenticated user as the property owner.
         property.setOwner(currentUser);
 
+        // Set default lifecycle timestamps and status defaults
+        if (property.getTransactionType() == null) {
+            property.setTransactionType(TransactionType.RENT);
+        }
+        if (property.getTenantPreference() == null) {
+            property.setTenantPreference(TenantPreference.ANY);
+        }
+        if (property.getStatus() == null) {
+            property.setStatus(PropertyStatus.ACTIVE);
+        }
+        property.setLastRefreshedAt(LocalDateTime.now());
+
         return propertyRepository.save(property);
     }
 
@@ -68,14 +82,14 @@ public class PropertyService {
 
         return propertyRepository.findByCityAndStatus(
                 city,
-                PropertyStatus.AVAILABLE
+                PropertyStatus.ACTIVE
         );
     }
 
     @Transactional(readOnly = true)
-public List<Property> getPropertiesByOwner(UUID ownerId) {
-    return propertyRepository.findByOwnerId(ownerId);
-}
+    public List<Property> getPropertiesByOwner(UUID ownerId) {
+        return propertyRepository.findByOwnerId(ownerId);
+    }
 
     // =========================================================
     // PROPERTY SEARCH / FILTER
@@ -103,7 +117,7 @@ public List<Property> getPropertiesByOwner(UUID ownerId) {
             double radiusKm) {
 
         return propertyRepository
-                .findByStatus(PropertyStatus.AVAILABLE)
+                .findByStatus(PropertyStatus.ACTIVE)
                 .stream()
                 .filter(property -> {
 
@@ -180,18 +194,44 @@ public List<Property> getPropertiesByOwner(UUID ownerId) {
 
         Property property = getPropertyById(propertyId);
 
-        // Verify that the user is allowed to modify this property.
+        // Verify ownership/RBAC permissions
         validateOwnershipOrAdmin(property, currentUser);
 
+        // Core information
         property.setTitle(updatedDetails.getTitle());
         property.setDescription(updatedDetails.getDescription());
         property.setMonthlyRent(updatedDetails.getMonthlyRent());
         property.setSecurityDeposit(updatedDetails.getSecurityDeposit());
+        property.setMaintenanceFee(updatedDetails.getMaintenanceFee());
+
+        // Domain specifications
         property.setPropertyType(updatedDetails.getPropertyType());
+        property.setTransactionType(updatedDetails.getTransactionType());
+        property.setFurnishingStatus(updatedDetails.getFurnishingStatus());
+        property.setTenantPreference(updatedDetails.getTenantPreference());
+
+        // Physical parameters
         property.setBedrooms(updatedDetails.getBedrooms());
         property.setBathrooms(updatedDetails.getBathrooms());
+        property.setPropertyAgeYears(updatedDetails.getPropertyAgeYears());
+        property.setFloorNumber(updatedDetails.getFloorNumber());
+        property.setTotalFloors(updatedDetails.getTotalFloors());
+        property.setFacingDirection(updatedDetails.getFacingDirection());
+        property.setParkingSpaces(updatedDetails.getParkingSpaces());
+
+        // Location & Availability
         property.setCity(updatedDetails.getCity());
         property.setAddress(updatedDetails.getAddress());
+        property.setLandmark(updatedDetails.getLandmark());
+        property.setLatitude(updatedDetails.getLatitude());
+        property.setLongitude(updatedDetails.getLongitude());
+        property.setAvailabilityDate(updatedDetails.getAvailabilityDate());
+
+        // Amenities & Lifecycle refresh
+        if (updatedDetails.getAmenities() != null) {
+            property.setAmenities(updatedDetails.getAmenities());
+        }
+        property.setLastRefreshedAt(LocalDateTime.now());
 
         return propertyRepository.save(property);
     }
@@ -207,7 +247,7 @@ public List<Property> getPropertiesByOwner(UUID ownerId) {
 
         Property property = getPropertyById(propertyId);
 
-        // Verify that the user is allowed to delete this property.
+        // Verify ownership/RBAC permissions
         validateOwnershipOrAdmin(property, currentUser);
 
         propertyRepository.delete(property);
@@ -252,4 +292,3 @@ public List<Property> getPropertiesByOwner(UUID ownerId) {
         }
     }
 }
-

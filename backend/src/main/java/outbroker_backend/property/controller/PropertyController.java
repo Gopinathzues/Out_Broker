@@ -36,24 +36,45 @@ public class PropertyController {
             @Valid @RequestBody CreatePropertyRequest request,
             @AuthenticationPrincipal User currentUser) {
 
-        Property property = new Property(
-                request.getTitle(),
-                request.getDescription(),
-                request.getMonthlyRent(),
-                request.getSecurityDeposit(),
-                request.getPropertyType(),
-                request.getBedrooms(),
-                request.getBathrooms(),
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getCity(),
-                request.getAddress(),
-                currentUser
-        );
+        Property property = new Property();
+
+        property.setTitle(request.getTitle());
+        property.setDescription(request.getDescription());
+        property.setMonthlyRent(request.getMonthlyRent());
+        property.setSecurityDeposit(request.getSecurityDeposit());
+        property.setMaintenanceFee(request.getMaintenanceFee());
+
+        property.setPropertyType(request.getPropertyType());
+        property.setTransactionType(request.getTransactionType());
+        property.setFurnishingStatus(request.getFurnishingStatus());
+        property.setTenantPreference(request.getTenantPreference());
+
+        property.setBedrooms(request.getBedrooms());
+        property.setBathrooms(request.getBathrooms());
+        property.setPropertyAgeYears(request.getPropertyAgeYears());
+        property.setFloorNumber(request.getFloorNumber());
+        property.setTotalFloors(request.getTotalFloors());
+        property.setFacingDirection(request.getFacingDirection());
+        property.setParkingSpaces(request.getParkingSpaces());
+
+        property.setLatitude(request.getLatitude());
+        property.setLongitude(request.getLongitude());
+        property.setCity(request.getCity());
+        property.setAddress(request.getAddress());
+        property.setLandmark(request.getLandmark());
+
+        property.setAvailabilityDate(request.getAvailabilityDate());
+        property.setAmenities(request.getAmenities());
+
+        property.setOwner(currentUser);
 
         Property savedProperty = propertyService.createProperty(property, currentUser);
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Property created successfully", new PropertyResponse(savedProperty)));
+                .body(ApiResponse.success(
+                        "Property created successfully",
+                        new PropertyResponse(savedProperty)
+                ));
     }
 
     @GetMapping
@@ -61,18 +82,33 @@ public class PropertyController {
         PropertySearchCriteria criteria = new PropertySearchCriteria();
         criteria.setStatus(PropertyStatus.AVAILABLE);
 
-        List<PropertyResponse> properties = propertyService.searchPropertiesWithFilters(criteria);
-        return ResponseEntity.ok(ApiResponse.success("All available properties retrieved successfully", properties));
+        List<PropertyResponse> properties =
+                propertyService.searchPropertiesWithFilters(criteria);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "All available properties retrieved successfully",
+                        properties
+                )
+        );
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<PropertyResponse>>> getAvailablePropertiesByCity(@RequestParam String city) {
-        List<PropertyResponse> properties = propertyService.getAvailablePropertiesByCity(city)
+    public ResponseEntity<ApiResponse<List<PropertyResponse>>> getAvailablePropertiesByCity(
+            @RequestParam String city) {
+
+        List<PropertyResponse> properties = propertyService
+                .getAvailablePropertiesByCity(city)
                 .stream()
                 .map(PropertyResponse::new)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(ApiResponse.success("Properties retrieved successfully", properties));
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Properties retrieved successfully",
+                        properties
+                )
+        );
     }
 
     @GetMapping("/filter")
@@ -80,11 +116,13 @@ public class PropertyController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) java.math.BigDecimal minRent,
             @RequestParam(required = false) java.math.BigDecimal maxRent,
-            @RequestParam(required = false) outbroker_backend.common.enums.PropertyType propertyType,
+            @RequestParam(required = false)
+            outbroker_backend.common.enums.PropertyType propertyType,
             @RequestParam(required = false) Integer bedrooms,
             @RequestParam(required = false) Integer bathrooms) {
 
         PropertySearchCriteria criteria = new PropertySearchCriteria();
+
         criteria.setCity(city);
         criteria.setMinRent(minRent);
         criteria.setMaxRent(maxRent);
@@ -93,8 +131,15 @@ public class PropertyController {
         criteria.setBathrooms(bathrooms);
         criteria.setStatus(PropertyStatus.AVAILABLE);
 
-        List<PropertyResponse> properties = propertyService.searchPropertiesWithFilters(criteria);
-        return ResponseEntity.ok(ApiResponse.success("Properties filtered successfully", properties));
+        List<PropertyResponse> properties =
+                propertyService.searchPropertiesWithFilters(criteria);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Properties filtered successfully",
+                        properties
+                )
+        );
     }
 
     @GetMapping("/nearby")
@@ -103,33 +148,52 @@ public class PropertyController {
             @RequestParam double longitude,
             @RequestParam(defaultValue = "10") double radiusKm) {
 
-        List<PropertyResponse> properties = propertyService.findNearbyProperties(latitude, longitude, radiusKm);
-        return ResponseEntity.ok(ApiResponse.success("Nearby properties retrieved successfully", properties));
+        List<PropertyResponse> properties =
+                propertyService.findNearbyProperties(
+                        latitude,
+                        longitude,
+                        radiusKm
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Nearby properties retrieved successfully",
+                        properties
+                )
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PropertyResponse>> getPropertyById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> getPropertyById(
+            @PathVariable UUID id) {
+
         Property property = propertyService.getPropertyById(id);
-        return ResponseEntity.ok(ApiResponse.success("Property details retrieved successfully", new PropertyResponse(property)));
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Property details retrieved successfully",
+                        new PropertyResponse(property)
+                )
+        );
     }
 
     @GetMapping("/owner/{ownerId}")
-public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
-        @PathVariable UUID ownerId) {
+    public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
+            @PathVariable UUID ownerId) {
 
-    List<PropertyResponse> properties = propertyService
-            .getPropertiesByOwner(ownerId)
-            .stream()
-            .map(PropertyResponse::new)
-            .collect(Collectors.toList());
+        List<PropertyResponse> properties = propertyService
+                .getPropertiesByOwner(ownerId)
+                .stream()
+                .map(PropertyResponse::new)
+                .collect(Collectors.toList());
 
-    return ResponseEntity.ok(
-            ApiResponse.success(
-                    "Owner properties retrieved successfully",
-                    properties
-            )
-    );
-}
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Owner properties retrieved successfully",
+                        properties
+                )
+        );
+    }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
@@ -139,6 +203,7 @@ public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
             @AuthenticationPrincipal User currentUser) {
 
         Property updatedDetails = new Property();
+
         updatedDetails.setTitle(request.getTitle());
         updatedDetails.setDescription(request.getDescription());
         updatedDetails.setMonthlyRent(request.getMonthlyRent());
@@ -149,8 +214,19 @@ public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
         updatedDetails.setCity(request.getCity());
         updatedDetails.setAddress(request.getAddress());
 
-        Property updatedProperty = propertyService.updateProperty(id, updatedDetails, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("Property updated successfully", new PropertyResponse(updatedProperty)));
+        Property updatedProperty =
+                propertyService.updateProperty(
+                        id,
+                        updatedDetails,
+                        currentUser
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Property updated successfully",
+                        new PropertyResponse(updatedProperty)
+                )
+        );
     }
 
     @DeleteMapping("/{id}")
@@ -160,6 +236,12 @@ public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
             @AuthenticationPrincipal User currentUser) {
 
         propertyService.deleteProperty(id, currentUser);
-        return ResponseEntity.ok(ApiResponse.success("Property deleted successfully", null));
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Property deleted successfully",
+                        null
+                )
+        );
     }
 }
