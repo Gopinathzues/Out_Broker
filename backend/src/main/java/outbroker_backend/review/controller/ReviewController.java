@@ -1,5 +1,7 @@
 package outbroker_backend.review.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,41 +23,71 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@Tag(
+        name = "Reviews",
+        description = "Property reviews, ratings, and review management APIs"
+)
 public class ReviewController {
 
     private final ReviewService reviewService;
 
     @PostMapping("/properties/{propertyId}/reviews")
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
+    @Operation(
+            summary = "Add a property review",
+            description = "Allows a tenant to submit a review and rating for a property."
+    )
     public ResponseEntity<ReviewResponse> addReview(
             Authentication authentication,
             @PathVariable UUID propertyId,
             @Valid @RequestBody ReviewRequest request) {
+
         UUID tenantId = extractUserId(authentication);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reviewService.addReview(tenantId, propertyId, request));
     }
 
     @GetMapping("/properties/{propertyId}/reviews")
+    @Operation(
+            summary = "Get property reviews",
+            description = "Retrieves paginated reviews for a property."
+    )
     public ResponseEntity<Page<ReviewResponse>> getPropertyReviews(
             @PathVariable UUID propertyId,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(reviewService.getPropertyReviews(propertyId, pageable));
+
+        return ResponseEntity.ok(
+                reviewService.getPropertyReviews(propertyId, pageable)
+        );
     }
 
     @GetMapping("/properties/{propertyId}/rating")
+    @Operation(
+            summary = "Get property rating summary",
+            description = "Retrieves the rating summary for a property."
+    )
     public ResponseEntity<PropertyRatingSummary> getPropertyRatingSummary(
             @PathVariable UUID propertyId) {
-        return ResponseEntity.ok(reviewService.getPropertyRatingSummary(propertyId));
+
+        return ResponseEntity.ok(
+                reviewService.getPropertyRatingSummary(propertyId)
+        );
     }
 
     @DeleteMapping("/reviews/{reviewId}")
     @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT', 'ADMIN', 'ROLE_ADMIN')")
+    @Operation(
+            summary = "Delete a review",
+            description = "Deletes a review owned by the authenticated user or handled by an administrator."
+    )
     public ResponseEntity<Void> deleteReview(
             Authentication authentication,
             @PathVariable UUID reviewId) {
+
         UUID userId = extractUserId(authentication);
         reviewService.deleteReview(reviewId, userId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -63,23 +95,34 @@ public class ReviewController {
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new UnauthorizedAccessException("User is not authenticated");
         }
+
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UUID uuid) return uuid;
+
         if (principal instanceof String str) {
-            try { return UUID.fromString(str); } catch (IllegalArgumentException ignored) {}
+            try {
+                return UUID.fromString(str);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
+
         try {
             var method = principal.getClass().getMethod("getId");
             Object id = method.invoke(principal);
+
             if (id instanceof UUID uuid) return uuid;
             if (id instanceof String str) return UUID.fromString(str);
-        } catch (Exception ignored) {}
+
+        } catch (Exception ignored) {
+        }
 
         try {
             return UUID.fromString(authentication.getName());
         } catch (Exception e) {
-            throw new UnauthorizedAccessException("Could not resolve authenticated user ID");
+            throw new UnauthorizedAccessException(
+                    "Could not resolve authenticated user ID"
+            );
         }
     }
 }

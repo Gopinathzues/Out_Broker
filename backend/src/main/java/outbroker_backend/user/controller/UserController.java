@@ -1,5 +1,7 @@
 package outbroker_backend.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Tag(name = "User Profile", description = "Authenticated user profile and account management APIs")
 public class UserController {
 
     private final UserService userService;
@@ -23,50 +26,89 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(Authentication authentication) {
+    @Operation(
+            summary = "Get my profile",
+            description = "Retrieves the profile of the currently authenticated user."
+    )
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(
+            Authentication authentication) {
+
         UUID userId = extractUserId(authentication);
         UserProfileResponse profile = userService.getUserProfile(userId);
-        return ResponseEntity.ok(ApiResponse.success("User profile retrieved successfully", profile));
+
+        return ResponseEntity.ok(
+                ApiResponse.success("User profile retrieved successfully", profile)
+        );
     }
 
     @PatchMapping("/me")
+    @Operation(
+            summary = "Update my profile",
+            description = "Updates profile information for the currently authenticated user."
+    )
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateMyProfile(
             Authentication authentication,
             @Valid @RequestBody UpdateProfileRequest request
     ) {
         UUID userId = extractUserId(authentication);
-        UserProfileResponse updatedProfile = userService.updateProfile(userId, request);
-        return ResponseEntity.ok(ApiResponse.success("User profile updated successfully", updatedProfile));
+        UserProfileResponse updatedProfile =
+                userService.updateProfile(userId, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("User profile updated successfully", updatedProfile)
+        );
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(Authentication authentication) {
+    @Operation(
+            summary = "Delete my account",
+            description = "Permanently deletes the currently authenticated user's account."
+    )
+    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(
+            Authentication authentication) {
+
         UUID userId = extractUserId(authentication);
         userService.deleteAccount(userId);
-        return ResponseEntity.ok(ApiResponse.success("Account deleted successfully", null));
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Account deleted successfully", null)
+        );
     }
 
     private UUID extractUserId(Authentication authentication) {
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new UnauthorizedAccessException("User is not authenticated");
         }
+
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UUID uuid) return uuid;
+
         if (principal instanceof String str) {
-            try { return UUID.fromString(str); } catch (IllegalArgumentException ignored) {}
+            try {
+                return UUID.fromString(str);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
+
         try {
             var method = principal.getClass().getMethod("getId");
             Object id = method.invoke(principal);
+
             if (id instanceof UUID uuid) return uuid;
-            if (id instanceof String str) return UUID.fromString(str);
-        } catch (Exception ignored) {}
+
+            if (id instanceof String str) {
+                return UUID.fromString(str);
+            }
+        } catch (Exception ignored) {
+        }
 
         try {
             return UUID.fromString(authentication.getName());
         } catch (Exception e) {
-            throw new UnauthorizedAccessException("Could not resolve authenticated user ID");
+            throw new UnauthorizedAccessException(
+                    "Could not resolve authenticated user ID"
+            );
         }
     }
 }

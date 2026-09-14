@@ -1,5 +1,7 @@
 package outbroker_backend.chat.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -14,18 +16,34 @@ import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(
+        name = "WebSocket Chat",
+        description = "Real-time WebSocket chat messaging"
+)
 public class WebSocketChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatMessageRequest request, Authentication authentication) {
+    @Operation(
+            summary = "Send a chat message",
+            description = "Sends a real-time chat message and publishes it to the room and recipient."
+    )
+    public void sendMessage(
+            @Payload ChatMessageRequest request,
+            Authentication authentication) {
+
         UUID senderId = UUID.fromString(authentication.getName());
-        ChatMessageResponse response = chatService.saveMessage(senderId, request);
+
+        ChatMessageResponse response =
+                chatService.saveMessage(senderId, request);
 
         // Publish to room topic
-        messagingTemplate.convertAndSend("/topic/room." + request.getRoomId(), response);
+        messagingTemplate.convertAndSend(
+                "/topic/room." + request.getRoomId(),
+                response
+        );
 
         // Publish directly to recipient's private user queue
         messagingTemplate.convertAndSendToUser(

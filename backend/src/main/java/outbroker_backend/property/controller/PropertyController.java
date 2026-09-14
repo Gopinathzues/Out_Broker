@@ -1,5 +1,7 @@
 package outbroker_backend.property.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +19,17 @@ import outbroker_backend.property.service.PropertyService;
 import outbroker_backend.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/properties")
+@Tag(
+        name = "Properties",
+        description = "Property listing, search, filtering, nearby search, and management APIs"
+)
 public class PropertyController {
 
     private final PropertyService propertyService;
@@ -35,6 +40,10 @@ public class PropertyController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
+    @Operation(
+            summary = "Create a property",
+            description = "Creates a new property listing for an authenticated landlord or admin."
+    )
     public ResponseEntity<ApiResponse<PropertyResponse>> createProperty(
             @Valid @RequestBody CreatePropertyRequest request,
             @AuthenticationPrincipal User currentUser) {
@@ -81,7 +90,12 @@ public class PropertyController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Get all available properties",
+            description = "Retrieves all currently available property listings."
+    )
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> getAllProperties() {
+
         PropertySearchCriteria criteria = new PropertySearchCriteria();
         criteria.setStatus(PropertyStatus.AVAILABLE);
 
@@ -97,6 +111,10 @@ public class PropertyController {
     }
 
     @GetMapping("/search")
+    @Operation(
+            summary = "Search properties by city",
+            description = "Retrieves available properties located in the specified city."
+    )
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> getAvailablePropertiesByCity(
             @RequestParam String city) {
 
@@ -113,18 +131,27 @@ public class PropertyController {
                 )
         );
     }
-    // Add this endpoint to your PropertyController.java
 
-@GetMapping("/search/v2")
-public ResponseEntity<Page<Property>> searchPropertiesV2(
-        @ModelAttribute PropertySearchCriteria criteria,
-        Pageable pageable
-) {
-    Page<Property> properties = propertyService.searchProperties(criteria, pageable);
-    return ResponseEntity.ok(properties);
-}
+    @GetMapping("/search/v2")
+    @Operation(
+            summary = "Search properties with pagination",
+            description = "Searches properties using dynamic criteria with pagination and sorting."
+    )
+    public ResponseEntity<Page<Property>> searchPropertiesV2(
+            @ModelAttribute PropertySearchCriteria criteria,
+            Pageable pageable) {
+
+        Page<Property> properties =
+                propertyService.searchProperties(criteria, pageable);
+
+        return ResponseEntity.ok(properties);
+    }
 
     @GetMapping("/filter")
+    @Operation(
+            summary = "Filter properties",
+            description = "Filters available properties using city, rent range, property type, bedrooms, and bathrooms."
+    )
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> filterProperties(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) java.math.BigDecimal minRent,
@@ -156,6 +183,10 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
     }
 
     @GetMapping("/nearby")
+    @Operation(
+            summary = "Find nearby properties",
+            description = "Finds available properties within the specified radius of a latitude and longitude."
+    )
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> getNearbyProperties(
             @RequestParam double latitude,
             @RequestParam double longitude,
@@ -177,6 +208,10 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
     }
 
     @GetMapping("/{id}")
+    @Operation(
+            summary = "Get property by ID",
+            description = "Retrieves detailed information for a specific property."
+    )
     public ResponseEntity<ApiResponse<PropertyResponse>> getPropertyById(
             @PathVariable UUID id) {
 
@@ -191,6 +226,10 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
     }
 
     @GetMapping("/owner/{ownerId}")
+    @Operation(
+            summary = "Get properties by owner",
+            description = "Retrieves properties belonging to the specified owner."
+    )
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> getPropertiesByOwner(
             @PathVariable UUID ownerId) {
 
@@ -210,6 +249,10 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
+    @Operation(
+            summary = "Update a property",
+            description = "Updates an existing property listing. Requires landlord or admin authorization."
+    )
     public ResponseEntity<ApiResponse<PropertyResponse>> updateProperty(
             @PathVariable UUID id,
             @Valid @RequestBody UpdatePropertyRequest request,
@@ -217,20 +260,17 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
 
         Property updatedDetails = new Property();
 
-        // Core fields
         updatedDetails.setTitle(request.getTitle());
         updatedDetails.setDescription(request.getDescription());
         updatedDetails.setMonthlyRent(request.getMonthlyRent());
         updatedDetails.setSecurityDeposit(request.getSecurityDeposit());
         updatedDetails.setMaintenanceFee(request.getMaintenanceFee());
 
-        // Domain specifications
         updatedDetails.setPropertyType(request.getPropertyType());
         updatedDetails.setTransactionType(request.getTransactionType());
         updatedDetails.setFurnishingStatus(request.getFurnishingStatus());
         updatedDetails.setTenantPreference(request.getTenantPreference());
 
-        // Physical parameters
         updatedDetails.setBedrooms(request.getBedrooms());
         updatedDetails.setBathrooms(request.getBathrooms());
         updatedDetails.setPropertyAgeYears(request.getPropertyAgeYears());
@@ -239,7 +279,6 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
         updatedDetails.setFacingDirection(request.getFacingDirection());
         updatedDetails.setParkingSpaces(request.getParkingSpaces());
 
-        // Location & Availability
         updatedDetails.setCity(request.getCity());
         updatedDetails.setAddress(request.getAddress());
         updatedDetails.setLandmark(request.getLandmark());
@@ -247,7 +286,6 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
         updatedDetails.setLongitude(request.getLongitude());
         updatedDetails.setAvailabilityDate(request.getAvailabilityDate());
 
-        // Amenities
         updatedDetails.setAmenities(request.getAmenities());
 
         Property updatedProperty =
@@ -267,6 +305,10 @@ public ResponseEntity<Page<Property>> searchPropertiesV2(
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
+    @Operation(
+            summary = "Delete a property",
+            description = "Deletes a property listing. Requires landlord or admin authorization."
+    )
     public ResponseEntity<ApiResponse<String>> deleteProperty(
             @PathVariable UUID id,
             @AuthenticationPrincipal User currentUser) {
