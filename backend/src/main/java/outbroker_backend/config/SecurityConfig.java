@@ -60,15 +60,18 @@ public class SecurityConfig {
                         // Property images
                         .requestMatchers(HttpMethod.GET, "/api/v1/properties/*/images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/properties/*/images/**")
-                            .hasAnyRole("LANDLORD", "ADMIN")
+                        .hasAnyRole("LANDLORD", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/properties/*/images/**")
-                            .hasAnyRole("LANDLORD", "ADMIN")
+                        .hasAnyRole("LANDLORD", "ADMIN")
 
                         // Static uploads
                         .requestMatchers("/uploads/**").permitAll()
-
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
