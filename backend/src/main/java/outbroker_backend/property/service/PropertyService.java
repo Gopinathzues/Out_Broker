@@ -15,8 +15,6 @@ import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.property.specification.PropertySpecification;
 import outbroker_backend.user.entity.User;
-import outbroker_backend.common.enums.HostelGenderPreference;
-import outbroker_backend.common.enums.FoodAvailability;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
