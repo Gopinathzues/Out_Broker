@@ -15,7 +15,10 @@ import outbroker_backend.property.dto.UpdatePropertyRequest;
 import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.service.PropertyService;
 import outbroker_backend.user.entity.User;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -110,6 +113,16 @@ public class PropertyController {
                 )
         );
     }
+    // Add this endpoint to your PropertyController.java
+
+@GetMapping("/search/v2")
+public ResponseEntity<Page<Property>> searchPropertiesV2(
+        @ModelAttribute PropertySearchCriteria criteria,
+        Pageable pageable
+) {
+    Page<Property> properties = propertyService.searchProperties(criteria, pageable);
+    return ResponseEntity.ok(properties);
+}
 
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> filterProperties(

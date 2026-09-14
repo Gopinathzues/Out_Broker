@@ -1,5 +1,6 @@
 package outbroker_backend.property.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class PropertyService {
@@ -104,6 +107,12 @@ public class PropertyService {
                 .map(PropertyResponse::new)
                 .collect(Collectors.toList());
     }
+    // Add this method to your PropertyService.java
+
+public Page<Property> searchProperties(PropertySearchCriteria criteria, Pageable pageable) {
+    Specification<Property> spec = PropertySpecification.buildSpecification(criteria);
+    return propertyRepository.findAll(spec, pageable);
+}
 
     // =========================================================
     // NEARBY PROPERTIES
