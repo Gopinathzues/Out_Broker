@@ -100,6 +100,23 @@ public class Property extends BaseEntity {
     @Column(name = "amenity")
     private Set<String> amenities = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "hostel_gender_preference")
+    private HostelGenderPreference hostelGenderPreference;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "food_availability")
+    private FoodAvailability foodAvailability;
+
+    @Column(name = "is_ac")
+    private Boolean isAc;
+
+    @Column(name = "curfew_time")
+    private String curfewTime;
+
+    @Column(name = "allowed_stay_duration")
+    private String allowedStayDuration;
+
     // No-arg Constructor required by JPA
     public Property() {}
 
@@ -123,6 +140,21 @@ public class Property extends BaseEntity {
     }
 
     // Getters and Setters
+
+    public HostelGenderPreference getHostelGenderPreference() { return hostelGenderPreference; }
+    public void setHostelGenderPreference(HostelGenderPreference hostelGenderPreference) { this.hostelGenderPreference = hostelGenderPreference; }
+
+    public FoodAvailability getFoodAvailability() { return foodAvailability; }
+    public void setFoodAvailability(FoodAvailability foodAvailability) { this.foodAvailability = foodAvailability; }
+
+    public Boolean getIsAc() { return isAc; }
+    public void setIsAc(Boolean isAc) { this.isAc = isAc; }
+
+    public String getCurfewTime() { return curfewTime; }
+    public void setCurfewTime(String curfewTime) { this.curfewTime = curfewTime; }
+
+    public String getAllowedStayDuration() { return allowedStayDuration; }
+    public void setAllowedStayDuration(String allowedStayDuration) { this.allowedStayDuration = allowedStayDuration; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 

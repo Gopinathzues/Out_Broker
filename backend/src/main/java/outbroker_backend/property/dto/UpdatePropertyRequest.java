@@ -1,6 +1,11 @@
 package outbroker_backend.property.dto;
 
-import outbroker_backend.common.enums.*;
+import outbroker_backend.common.enums.FoodAvailability;
+import outbroker_backend.common.enums.FurnishingStatus;
+import outbroker_backend.common.enums.HostelGenderPreference;
+import outbroker_backend.common.enums.PropertyType;
+import outbroker_backend.common.enums.TenantPreference;
+import outbroker_backend.common.enums.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,20 +22,27 @@ public class UpdatePropertyRequest {
     private TransactionType transactionType;
     private FurnishingStatus furnishingStatus;
     private TenantPreference tenantPreference;
-    private Integer bedrooms;
-    private Integer bathrooms;
+    private int bedrooms;
+    private int bathrooms;
     private Integer propertyAgeYears;
     private Integer floorNumber;
     private Integer totalFloors;
     private String facingDirection;
     private Integer parkingSpaces;
-    private Double latitude;
-    private Double longitude;
     private String city;
     private String address;
     private String landmark;
+    private double latitude;
+    private double longitude;
     private LocalDate availabilityDate;
     private Set<String> amenities;
+
+    // Hostel / PG Fields
+    private HostelGenderPreference hostelGenderPreference;
+    private FoodAvailability foodAvailability;
+    private Boolean isAc;
+    private String curfewTime;
+    private String allowedStayDuration;
 
     public UpdatePropertyRequest() {}
 
@@ -62,11 +74,11 @@ public class UpdatePropertyRequest {
     public TenantPreference getTenantPreference() { return tenantPreference; }
     public void setTenantPreference(TenantPreference tenantPreference) { this.tenantPreference = tenantPreference; }
 
-    public Integer getBedrooms() { return bedrooms; }
-    public void setBedrooms(Integer bedrooms) { this.bedrooms = bedrooms; }
+    public int getBedrooms() { return bedrooms; }
+    public void setBedrooms(int bedrooms) { this.bedrooms = bedrooms; }
 
-    public Integer getBathrooms() { return bathrooms; }
-    public void setBathrooms(Integer bathrooms) { this.bathrooms = bathrooms; }
+    public int getBathrooms() { return bathrooms; }
+    public void setBathrooms(int bathrooms) { this.bathrooms = bathrooms; }
 
     public Integer getPropertyAgeYears() { return propertyAgeYears; }
     public void setPropertyAgeYears(Integer propertyAgeYears) { this.propertyAgeYears = propertyAgeYears; }
@@ -83,12 +95,6 @@ public class UpdatePropertyRequest {
     public Integer getParkingSpaces() { return parkingSpaces; }
     public void setParkingSpaces(Integer parkingSpaces) { this.parkingSpaces = parkingSpaces; }
 
-    public Double getLatitude() { return latitude; }
-    public void setLatitude(Double latitude) { this.latitude = latitude; }
-
-    public Double getLongitude() { return longitude; }
-    public void setLongitude(Double longitude) { this.longitude = longitude; }
-
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
 
@@ -98,9 +104,30 @@ public class UpdatePropertyRequest {
     public String getLandmark() { return landmark; }
     public void setLandmark(String landmark) { this.landmark = landmark; }
 
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
     public LocalDate getAvailabilityDate() { return availabilityDate; }
     public void setAvailabilityDate(LocalDate availabilityDate) { this.availabilityDate = availabilityDate; }
 
     public Set<String> getAmenities() { return amenities; }
     public void setAmenities(Set<String> amenities) { this.amenities = amenities; }
+
+    public HostelGenderPreference getHostelGenderPreference() { return hostelGenderPreference; }
+    public void setHostelGenderPreference(HostelGenderPreference hostelGenderPreference) { this.hostelGenderPreference = hostelGenderPreference; }
+
+    public FoodAvailability getFoodAvailability() { return foodAvailability; }
+    public void setFoodAvailability(FoodAvailability foodAvailability) { this.foodAvailability = foodAvailability; }
+
+    public Boolean getIsAc() { return isAc; }
+    public void setIsAc(Boolean isAc) { this.isAc = isAc; }
+
+    public String getCurfewTime() { return curfewTime; }
+    public void setCurfewTime(String curfewTime) { this.curfewTime = curfewTime; }
+
+    public String getAllowedStayDuration() { return allowedStayDuration; }
+    public void setAllowedStayDuration(String allowedStayDuration) { this.allowedStayDuration = allowedStayDuration; }
 }

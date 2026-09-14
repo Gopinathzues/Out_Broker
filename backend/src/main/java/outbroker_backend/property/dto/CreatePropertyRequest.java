@@ -37,6 +37,11 @@ public class CreatePropertyRequest {
     private Integer totalFloors;
     private String facingDirection;
     private Integer parkingSpaces;
+    private HostelGenderPreference hostelGenderPreference;
+    private FoodAvailability foodAvailability;
+    private Boolean isAc;
+    private String curfewTime;
+    private String allowedStayDuration;
 
     @NotNull(message = "Latitude is required")
     private Double latitude;
@@ -125,4 +130,20 @@ public class CreatePropertyRequest {
 
     public Set<String> getAmenities() { return amenities; }
     public void setAmenities(Set<String> amenities) { this.amenities = amenities; }
+
+    public HostelGenderPreference getHostelGenderPreference() { return hostelGenderPreference; }
+    public void setHostelGenderPreference(HostelGenderPreference hostelGenderPreference) { this.hostelGenderPreference = hostelGenderPreference; }
+
+    public FoodAvailability getFoodAvailability() { return foodAvailability; }
+    public void setFoodAvailability(FoodAvailability foodAvailability) { this.foodAvailability = foodAvailability; }
+
+    public Boolean getIsAc() { return isAc; }
+    public void setIsAc(Boolean isAc) { this.isAc = isAc; }
+
+    public String getCurfewTime() { return curfewTime; }
+    public void setCurfewTime(String curfewTime) { this.curfewTime = curfewTime; }
+
+    public String getAllowedStayDuration() { return allowedStayDuration; }
+    public void setAllowedStayDuration(String allowedStayDuration) { this.allowedStayDuration = allowedStayDuration; }
+
 }

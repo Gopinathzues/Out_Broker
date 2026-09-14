@@ -15,7 +15,8 @@ import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.property.specification.PropertySpecification;
 import outbroker_backend.user.entity.User;
-
+import outbroker_backend.common.enums.HostelGenderPreference;
+import outbroker_backend.common.enums.FoodAvailability;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -226,6 +227,13 @@ public class PropertyService {
         property.setLatitude(updatedDetails.getLatitude());
         property.setLongitude(updatedDetails.getLongitude());
         property.setAvailabilityDate(updatedDetails.getAvailabilityDate());
+
+        // Hostel / PG specifications
+        property.setHostelGenderPreference(updatedDetails.getHostelGenderPreference());
+        property.setFoodAvailability(updatedDetails.getFoodAvailability());
+        property.setIsAc(updatedDetails.getIsAc());
+        property.setCurfewTime(updatedDetails.getCurfewTime());
+        property.setAllowedStayDuration(updatedDetails.getAllowedStayDuration());
 
         // Amenities & Lifecycle refresh
         if (updatedDetails.getAmenities() != null) {

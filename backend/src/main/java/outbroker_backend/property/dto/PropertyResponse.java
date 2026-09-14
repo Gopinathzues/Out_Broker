@@ -36,6 +36,11 @@ public class PropertyResponse {
     private LocalDate availabilityDate;
     private Set<String> amenities;
     private UUID ownerId;
+    private HostelGenderPreference hostelGenderPreference;
+    private FoodAvailability foodAvailability;
+    private Boolean isAc;
+    private String curfewTime;
+    private String allowedStayDuration;
 
     public PropertyResponse(Property property) {
         this.id = property.getId();
@@ -64,6 +69,12 @@ public class PropertyResponse {
         this.availabilityDate = property.getAvailabilityDate();
         this.amenities = property.getAmenities();
         this.ownerId = property.getOwner() != null ? property.getOwner().getId() : null;
+        this.hostelGenderPreference = property.getHostelGenderPreference();
+    this.foodAvailability = property.getFoodAvailability();
+    this.isAc = property.getIsAc();
+    this.curfewTime = property.getCurfewTime();
+    this.allowedStayDuration = property.getAllowedStayDuration();
+    
     }
 
     // Getters
@@ -93,4 +104,9 @@ public class PropertyResponse {
     public LocalDate getAvailabilityDate() { return availabilityDate; }
     public Set<String> getAmenities() { return amenities; }
     public UUID getOwnerId() { return ownerId; }
+    public HostelGenderPreference getHostelGenderPreference() { return hostelGenderPreference; }
+    public FoodAvailability getFoodAvailability() { return foodAvailability; }
+    public Boolean getIsAc() { return isAc; }
+    public String getCurfewTime() { return curfewTime; }
+    public String getAllowedStayDuration() { return allowedStayDuration; }
 }
