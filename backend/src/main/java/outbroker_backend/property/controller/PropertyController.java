@@ -3,6 +3,8 @@ package outbroker_backend.property.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,8 +19,6 @@ import outbroker_backend.property.dto.UpdatePropertyRequest;
 import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.service.PropertyService;
 import outbroker_backend.user.entity.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -80,7 +80,8 @@ public class PropertyController {
 
         property.setOwner(currentUser);
 
-        Property savedProperty = propertyService.createProperty(property, currentUser);
+        Property savedProperty =
+                propertyService.createProperty(property, currentUser);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
@@ -137,14 +138,17 @@ public class PropertyController {
             summary = "Search properties with pagination",
             description = "Searches properties using dynamic criteria with pagination and sorting."
     )
-    public ResponseEntity<Page<Property>> searchPropertiesV2(
+    public ResponseEntity<Page<PropertyResponse>> searchPropertiesV2(
             @ModelAttribute PropertySearchCriteria criteria,
             Pageable pageable) {
 
         Page<Property> properties =
                 propertyService.searchProperties(criteria, pageable);
 
-        return ResponseEntity.ok(properties);
+        Page<PropertyResponse> response =
+                properties.map(PropertyResponse::new);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/filter")
