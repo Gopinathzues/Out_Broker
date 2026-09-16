@@ -60,17 +60,22 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(UUID reviewId, UUID tenantId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Review not found with ID: " + reviewId));
+public void deleteReview(UUID reviewId, UUID userId, boolean isAdmin) {
 
-        if (!review.getTenantId().equals(tenantId)) {
-            throw new UnauthorizedAccessException("You are not authorized to delete this review");
-        }
+    Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Review not found with ID: " + reviewId
+                    ));
 
-        reviewRepository.delete(review);
+    if (!isAdmin && !review.getTenantId().equals(userId)) {
+        throw new UnauthorizedAccessException(
+                "You are not authorized to delete this review"
+        );
     }
 
+    reviewRepository.delete(review);
+}
     private ReviewResponse mapToResponse(Review review) {
         return ReviewResponse.builder()
                 .id(review.getId())

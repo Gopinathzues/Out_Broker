@@ -92,9 +92,22 @@ public class ChatService {
     }
 
     @Transactional
-    public void markAsRead(UUID roomId, UUID userId) {
-        chatMessageRepository.markMessagesAsRead(roomId, userId);
+public void markAsRead(UUID roomId, UUID userId) {
+
+    ChatRoom room = chatRoomRepository.findById(roomId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Chat room not found"));
+
+    if (!room.getTenantId().equals(userId)
+            && !room.getLandlordId().equals(userId)) {
+
+        throw new UnauthorizedAccessException(
+                "You are not authorized to access this chat room"
+        );
     }
+
+    chatMessageRepository.markMessagesAsRead(roomId, userId);
+}
 
     private ChatRoomResponse mapToRoomResponse(ChatRoom room, UUID userId) {
         Long unread = chatMessageRepository.countByChatRoomIdAndRecipientIdAndIsReadFalse(room.getId(), userId);

@@ -32,10 +32,10 @@ public class BookingController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
     @Operation(
             summary = "Create a booking",
-            description = "Creates a property visit booking for the authenticated user."
+            description = "Creates a property visit booking for the authenticated tenant."
     )
     public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
             Authentication authentication,
@@ -52,7 +52,7 @@ public class BookingController {
     }
 
     @GetMapping("/tenant")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('TENANT', 'ROLE_TENANT')")
     @Operation(
             summary = "Get tenant bookings",
             description = "Retrieves all bookings created by the authenticated tenant."
@@ -71,7 +71,16 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("""
+            hasAnyAuthority(
+                'LANDLORD',
+                'BROKER',
+                'ADMIN',
+                'ROLE_LANDLORD',
+                'ROLE_BROKER',
+                'ROLE_ADMIN'
+            )
+            """)
     @Operation(
             summary = "Get owner bookings",
             description = "Retrieves all bookings associated with properties owned by the authenticated owner."
@@ -93,7 +102,7 @@ public class BookingController {
     @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Update booking status",
-            description = "Updates the status of an existing property visit booking."
+            description = "Updates the status of an existing property visit booking for an authorized participant."
     )
     public ResponseEntity<ApiResponse<BookingResponse>> updateStatus(
             Authentication authentication,
@@ -105,19 +114,28 @@ public class BookingController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Booking status updated",
-                        bookingService.updateBookingStatus(userId, id, request)
+                        bookingService.updateBookingStatus(
+                                userId,
+                                id,
+                                request
+                        )
                 )
         );
     }
 
     private UUID extractUserId(Authentication authentication) {
+
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new UnauthorizedAccessException("User is not authenticated");
+            throw new UnauthorizedAccessException(
+                    "User is not authenticated"
+            );
         }
 
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof UUID uuid) return uuid;
+        if (principal instanceof UUID uuid) {
+            return uuid;
+        }
 
         if (principal instanceof String str) {
             try {
@@ -130,8 +148,13 @@ public class BookingController {
             var method = principal.getClass().getMethod("getId");
             Object id = method.invoke(principal);
 
-            if (id instanceof UUID uuid) return uuid;
-            if (id instanceof String str) return UUID.fromString(str);
+            if (id instanceof UUID uuid) {
+                return uuid;
+            }
+
+            if (id instanceof String str) {
+                return UUID.fromString(str);
+            }
 
         } catch (Exception ignored) {
         }

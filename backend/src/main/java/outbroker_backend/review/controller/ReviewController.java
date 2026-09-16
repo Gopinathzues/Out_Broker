@@ -86,7 +86,15 @@ public class ReviewController {
             @PathVariable UUID reviewId) {
 
         UUID userId = extractUserId(authentication);
-        reviewService.deleteReview(reviewId, userId);
+
+boolean isAdmin =
+        authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ADMIN") ||
+                        authority.getAuthority().equals("ROLE_ADMIN")
+                );
+
+reviewService.deleteReview(reviewId, userId, isAdmin);
 
         return ResponseEntity.noContent().build();
     }
