@@ -32,7 +32,8 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             Message<?> message,
             MessageChannel channel) {
 
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor =
+                StompHeaderAccessor.wrap(message);
 
         StompCommand command = accessor.getCommand();
 
@@ -51,49 +52,79 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         return message;
     }
 
-    private void authenticate(
-            StompHeaderAccessor accessor) {
+    // =========================================================
+    // AUTHENTICATE STOMP CONNECTION
+    // =========================================================
 
-        String authorization = accessor.getFirstNativeHeader("Authorization");
+    private void authenticate(StompHeaderAccessor accessor) {
+
+        String authorization =
+                accessor.getFirstNativeHeader("Authorization");
 
         if (authorization == null
                 || !authorization.startsWith("Bearer ")) {
 
             throw new IllegalArgumentException(
-                    "WebSocket authentication required");
+                    "WebSocket authentication required"
+            );
         }
 
         String jwt = authorization.substring(7);
 
         try {
 
-            String phoneNumber = jwtService.extractPhoneNumber(jwt);
+            String phoneNumber =
+                    jwtService.extractPhoneNumber(jwt);
 
             if (phoneNumber == null) {
                 throw new IllegalArgumentException(
-                        "Invalid WebSocket token");
+                        "Invalid WebSocket token"
+                );
             }
 
-            User user = userRepository
-                    .findByPhoneNumber(phoneNumber)
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "User not found"));
+            User user =
+                    userRepository.findByPhoneNumber(phoneNumber)
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException(
+                                            "User not found"
+                                    )
+                            );
 
             if (!jwtService.isTokenValid(jwt, user)) {
                 throw new IllegalArgumentException(
-                        "Invalid or expired WebSocket token");
+                        "Invalid or expired WebSocket token"
+                );
             }
 
             List<SimpleGrantedAuthority> authorities = List.of(
                     new SimpleGrantedAuthority(
-                            user.getRole().name()),
+                            user.getRole().name()
+                    ),
                     new SimpleGrantedAuthority(
-                            "ROLE_" + user.getRole().name()));
+                            "ROLE_" + user.getRole().name()
+                    )
+            );
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user.getId().toString(),
-                    null,
-                    authorities);
+            /*
+             * IMPORTANT:
+             *
+             * The principal name is explicitly set to the
+             * authenticated user's UUID.
+             *
+             * This matches the value used by:
+             *
+             * convertAndSendToUser(
+             *     recipientId.toString(),
+             *     "/queue/messages",
+             *     response
+             * )
+             */
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            user.getId().toString(),
+                            null,
+                            authorities
+                    );
 
             accessor.setUser(authentication);
 
@@ -101,54 +132,87 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
             throw new IllegalArgumentException(
                     "WebSocket authentication failed",
-                    e);
+                    e
+            );
         }
     }
+
+    // =========================================================
+    // AUTHORIZE SEND
+    // =========================================================
 
     private void authorizeSend(
             StompHeaderAccessor accessor) {
 
-        String destination = accessor.getDestination();
+        String destination =
+                accessor.getDestination();
 
         if (!"/app/chat.sendMessage".equals(destination)) {
 
             throw new IllegalArgumentException(
-                    "Unauthorized WebSocket destination");
+                    "Unauthorized WebSocket destination"
+            );
+        }
+
+        /*
+         * SEND must come from an authenticated STOMP connection.
+         */
+        Authentication authentication =
+                getAuthentication(accessor);
+
+        if (authentication == null) {
+
+            throw new IllegalArgumentException(
+                    "WebSocket authentication required"
+            );
         }
     }
+
+    // =========================================================
+    // AUTHORIZE SUBSCRIBE
+    // =========================================================
 
     private void authorizeSubscribe(
             StompHeaderAccessor accessor) {
 
-        String destination = accessor.getDestination();
+        String destination =
+                accessor.getDestination();
 
         if (destination == null) {
+
             throw new IllegalArgumentException(
-                    "WebSocket subscription destination is required");
+                    "WebSocket subscription destination is required"
+            );
         }
 
-        /*
-         * Private user queue.
-         *
-         * The client subscribes to:
-         *
-         * /user/queue/messages
-         */
+        Authentication authentication =
+                getAuthentication(accessor);
+
+        if (authentication == null) {
+
+            throw new IllegalArgumentException(
+                    "WebSocket authentication required"
+            );
+        }
+
+        // ---------------------------------------------------------
+        // PRIVATE USER QUEUE
+        // ---------------------------------------------------------
+
         if ("/user/queue/messages".equals(destination)) {
             return;
         }
 
-        /*
-         * Room subscription.
-         *
-         * Expected:
-         *
-         * /topic/room.{roomId}
-         */
+        // ---------------------------------------------------------
+        // CHAT ROOM TOPIC
+        // ---------------------------------------------------------
+
         if (destination.startsWith("/topic/room.")) {
 
-            String roomIdText = destination.substring(
-                    "/topic/room.".length());
+            String roomIdText =
+                    destination.substring(
+                            "/topic/room.".length()
+                    );
 
             UUID roomId;
 
@@ -159,45 +223,94 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             } catch (IllegalArgumentException e) {
 
                 throw new IllegalArgumentException(
-                        "Invalid chat room ID");
+                        "Invalid chat room ID"
+                );
             }
 
-            Authentication authentication = (Authentication) accessor.getHeader(
-                    "simpUser");
+            UUID userId =
+                    extractUserId(authentication);
 
-            if (authentication == null) {
+            ChatRoom room =
+                    chatRoomRepository.findById(roomId)
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException(
+                                            "Chat room not found"
+                                    )
+                            );
 
-                throw new IllegalArgumentException(
-                        "WebSocket authentication required");
-            }
-
-            Object principal = authentication.getPrincipal();
-
-            if (!(principal instanceof User user)) {
-
-                throw new IllegalArgumentException(
-                        "Invalid WebSocket user");
-            }
-
-            UUID userId = user.getId();
-
-            ChatRoom room = chatRoomRepository.findById(roomId)
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Chat room not found"));
-
-            boolean participant = room.getTenantId().equals(userId)
-                    || room.getLandlordId().equals(userId);
+            boolean participant =
+                    room.getTenantId().equals(userId)
+                            || room.getLandlordId().equals(userId);
 
             if (!participant) {
 
                 throw new IllegalArgumentException(
-                        "You are not a participant in this chat room");
+                        "You are not a participant in this chat room"
+                );
             }
 
             return;
         }
 
+        // ---------------------------------------------------------
+        // UNKNOWN DESTINATION
+        // ---------------------------------------------------------
+
         throw new IllegalArgumentException(
-                "Unauthorized WebSocket subscription");
+                "Unauthorized WebSocket subscription"
+        );
+    }
+
+    // =========================================================
+    // AUTHENTICATION HELPER
+    // =========================================================
+
+    private Authentication getAuthentication(
+            StompHeaderAccessor accessor) {
+
+        Object user =
+                accessor.getUser();
+
+        if (user instanceof Authentication authentication) {
+            return authentication;
+        }
+
+        return null;
+    }
+
+    // =========================================================
+    // USER ID HELPER
+    // =========================================================
+
+    private UUID extractUserId(
+            Authentication authentication) {
+
+        if (authentication == null) {
+
+            throw new IllegalArgumentException(
+                    "WebSocket authentication required"
+            );
+        }
+
+        Object principal =
+                authentication.getPrincipal();
+
+        if (principal instanceof String principalId) {
+
+            try {
+
+                return UUID.fromString(principalId);
+
+            } catch (IllegalArgumentException e) {
+
+                throw new IllegalArgumentException(
+                        "Invalid authenticated user ID"
+                );
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Invalid WebSocket principal"
+        );
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import outbroker_backend.chat.dto.ChatMessageRequest;
 import outbroker_backend.chat.dto.ChatMessageResponse;
 import outbroker_backend.chat.service.ChatService;
-import outbroker_backend.user.entity.User;
+import outbroker_backend.common.exception.UnauthorizedAccessException;
 
 import java.util.UUID;
 
@@ -20,28 +20,50 @@ import java.util.UUID;
 @Tag(name = "WebSocket Chat", description = "Real-time WebSocket chat messaging")
 public class WebSocketChatController {
 
-        private final ChatService chatService;
-        private final SimpMessagingTemplate messagingTemplate;
+    private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-        @MessageMapping("/chat.sendMessage")
-        @Operation(summary = "Send a chat message", description = "Sends a real-time chat message and publishes it to the room and recipient.")
-        public void sendMessage(
-                        @Payload ChatMessageRequest request,
-                        Authentication authentication) {
+    @MessageMapping("/chat.sendMessage")
+    @Operation(
+            summary = "Send a chat message",
+            description = "Sends a real-time chat message and publishes it to the room and recipient."
+    )
+    public void sendMessage(
+            @Payload ChatMessageRequest request,
+            Authentication authentication) {
 
-                User user = (User) authentication.getPrincipal();
-                UUID senderId = user.getId();
-                ChatMessageResponse response = chatService.saveMessage(senderId, request);
+        UUID senderId = extractUserId(authentication);
 
-                // Publish to room topic
-                messagingTemplate.convertAndSend(
-                                "/topic/room." + request.getRoomId(),
-                                response);
+        ChatMessageResponse response =
+                chatService.saveMessage(senderId, request);
 
-                // Publish directly to recipient's private user queue
-                messagingTemplate.convertAndSendToUser(
-                                request.getRecipientId().toString(),
-                                "/queue/messages",
-                                response);
+        // Publish to room topic
+        messagingTemplate.convertAndSend(
+                "/topic/room." + request.getRoomId(),
+                response
+        );
+
+        // Publish directly to recipient's private user queue
+        messagingTemplate.convertAndSendToUser(
+                request.getRecipientId().toString(),
+                "/queue/messages",
+                response
+        );
+    }
+
+    private UUID extractUserId(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new UnauthorizedAccessException(
+                    "WebSocket authentication is required"
+            );
         }
+
+        try {
+            return UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            throw new UnauthorizedAccessException(
+                    "Could not resolve authenticated WebSocket user ID"
+            );
+        }
+    }
 }
