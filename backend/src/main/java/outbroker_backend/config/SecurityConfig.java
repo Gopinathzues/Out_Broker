@@ -38,7 +38,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // Stateless JWT security
+                // =====================================================
+                // STATELESS JWT SECURITY
+                // =====================================================
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -48,6 +50,9 @@ public class SecurityConfig {
                         )
                 )
 
+                // =====================================================
+                // AUTHORIZATION
+                // =====================================================
                 .authorizeHttpRequests(auth -> auth
 
                         // =====================================================
@@ -80,7 +85,12 @@ public class SecurityConfig {
                                 "/api/v1/properties/search"
                         )
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/search/v2").permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/search/v2"
+                        )
+                        .permitAll()
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -113,21 +123,37 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/v1/properties/*/images/**"
                         )
-                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+                        .hasAnyRole(
+                                "LANDLORD",
+                                "BROKER",
+                                "ADMIN"
+                        )
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
                                 "/api/v1/properties/*/images/**"
                         )
-                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+                        .hasAnyRole(
+                                "LANDLORD",
+                                "BROKER",
+                                "ADMIN"
+                        )
 
                         // =====================================================
                         // INQUIRIES
                         // =====================================================
-                        .requestMatchers("/api/v1/inquiries/owner")
-                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+                        .requestMatchers(
+                                "/api/v1/inquiries/owner"
+                        )
+                        .hasAnyRole(
+                                "LANDLORD",
+                                "BROKER",
+                                "ADMIN"
+                        )
 
-                        .requestMatchers("/api/v1/inquiries/**")
+                        .requestMatchers(
+                                "/api/v1/inquiries/**"
+                        )
                         .authenticated()
 
                         // =====================================================
@@ -139,9 +165,12 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/properties/*/verify"
                         )
-                        .hasAnyRole("LANDLORD", "ADMIN")
+                        .hasAnyRole(
+                                "LANDLORD",
+                                "ADMIN"
+                        )
 
-                        // Admin reviews verification
+                        // Admin property verification APIs
                         .requestMatchers(
                                 "/api/admin/**"
                         )
@@ -150,20 +179,27 @@ public class SecurityConfig {
                         // =====================================================
                         // ADMIN APIs
                         // =====================================================
-                        .requestMatchers("/api/v1/admin/**")
+                        .requestMatchers(
+                                "/api/v1/admin/**"
+                        )
                         .hasRole("ADMIN")
 
                         // =====================================================
                         // OWNER APIs
                         // =====================================================
-                        .requestMatchers("/api/v1/owner/**")
-                        .hasAnyRole("LANDLORD", "ADMIN")
+                        .requestMatchers(
+                                "/api/v1/owner/**"
+                        )
+                        .hasAnyRole(
+                                "LANDLORD",
+                                "ADMIN"
+                        )
 
                         // =====================================================
                         // REPORTS
                         // =====================================================
 
-                        // Anyone authenticated can submit a report
+                        // Authenticated users can submit reports
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/reports"
@@ -187,9 +223,18 @@ public class SecurityConfig {
                         // =====================================================
                         // STATIC UPLOADS
                         // =====================================================
-                        .requestMatchers("/uploads/**")
+                        .requestMatchers(
+                                "/uploads/**"
+                        )
                         .permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+
+                        // =====================================================
+                        // WEBSOCKET HANDSHAKE
+                        // =====================================================
+                        .requestMatchers(
+                                "/ws/**"
+                        )
+                        .permitAll()
 
                         // =====================================================
                         // EVERYTHING ELSE
@@ -198,9 +243,9 @@ public class SecurityConfig {
                         .authenticated()
                 )
 
-                // =============================================================
+                // =====================================================
                 // JWT FILTER
-                // =============================================================
+                // =====================================================
                 .addFilterBefore(
                         jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class
