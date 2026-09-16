@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import outbroker_backend.report.entity.Report;
 import outbroker_backend.report.service.ReportService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import outbroker_backend.user.entity.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,23 +27,29 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @PostMapping
-    @Operation(
-            summary = "Submit a report",
-            description = "Creates a report for a property or other reported issue."
-    )
-    public ResponseEntity<Report> submitReport(
-            @RequestParam UUID reporterId,
-            @RequestParam(required = false) UUID propertyId,
-            @RequestParam String reason) {
+   @PostMapping
+@PreAuthorize("isAuthenticated()")
+@Operation(
+        summary = "Submit a report",
+        description = "Creates a report for a property or other reported issue."
+)
+public ResponseEntity<Report> submitReport(
+        @RequestParam(required = false) UUID propertyId,
+        @RequestParam String reason,
+        @AuthenticationPrincipal User currentUser) {
 
-        Report report =
-                reportService.submitReport(reporterId, propertyId, reason);
+    Report report =
+            reportService.submitReport(
+                    currentUser.getId(),
+                    propertyId,
+                    reason
+            );
 
-        return ResponseEntity.ok(report);
-    }
+    return ResponseEntity.ok(report);
+}
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Get reports by status",
             description = "Retrieves reports filtered by their current status."
@@ -54,6 +63,7 @@ public class ReportController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Update report status",
             description = "Updates the status of an existing report."

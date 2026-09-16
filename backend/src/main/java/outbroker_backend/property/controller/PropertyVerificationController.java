@@ -9,6 +9,7 @@ import outbroker_backend.common.enums.VerificationStatus;
 import outbroker_backend.property.entity.PropertyVerification;
 import outbroker_backend.property.service.PropertyVerificationService;
 import outbroker_backend.user.entity.User;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,7 @@ public class PropertyVerificationController {
     }
 
     @PostMapping("/properties/{propertyId}/verify")
+    @PreAuthorize("hasAnyRole('LANDLORD', 'ADMIN')")
     @Operation(
             summary = "Submit property for verification",
             description = "Submits a property and its supporting document for verification."
@@ -49,6 +51,7 @@ public class PropertyVerificationController {
     }
 
     @PutMapping("/admin/properties/{propertyId}/verify")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Review property verification",
             description = "Allows an administrator to approve or reject a property's verification request."
@@ -71,6 +74,7 @@ public class PropertyVerificationController {
     }
 
     @GetMapping("/admin/properties/verifications")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Get verification requests by status",
             description = "Retrieves property verification requests matching the specified verification status."

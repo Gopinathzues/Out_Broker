@@ -26,53 +26,183 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Disables default Spring Security in-memory user generation
+        // Authentication is handled through the custom JWT filter.
         return username -> {
-            throw new UsernameNotFoundException("User authentication is handled via JWT tokens.");
+            throw new UsernameNotFoundException(
+                    "User authentication is handled via JWT tokens."
+            );
         };
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
+                // Stateless JWT security
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
                 .authorizeHttpRequests(auth -> auth
 
-                        // Authentication
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        // =====================================================
+                        // AUTHENTICATION
+                        // =====================================================
+                        .requestMatchers("/api/v1/auth/**")
+                        .permitAll()
 
-                        // Public property discovery
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/filter").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/nearby").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*").permitAll()
-
-                        // Owner inquiry endpoint
-                        .requestMatchers("/api/v1/inquiries/owner").hasRole("LANDLORD")
-
-                        // Other inquiry endpoints
-                        .requestMatchers("/api/v1/inquiries/**").authenticated()
-
-                        // Property images
-                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*/images/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/properties/*/images/**")
-                        .hasAnyRole("LANDLORD", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/properties/*/images/**")
-                        .hasAnyRole("LANDLORD", "ADMIN")
-
-                        // Static uploads
-                        .requestMatchers("/uploads/**").permitAll()
+                        // =====================================================
+                        // SWAGGER / OPENAPI
+                        // =====================================================
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**")
+                                "/v3/api-docs/**"
+                        )
                         .permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+                        // =====================================================
+                        // PUBLIC PROPERTY DISCOVERY
+                        // =====================================================
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/search"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/filter"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/nearby"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/*"
+                        )
+                        .permitAll()
+
+                        // =====================================================
+                        // PROPERTY IMAGES
+                        // =====================================================
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/properties/*/images/**"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/properties/*/images/**"
+                        )
+                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/v1/properties/*/images/**"
+                        )
+                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+
+                        // =====================================================
+                        // INQUIRIES
+                        // =====================================================
+                        .requestMatchers("/api/v1/inquiries/owner")
+                        .hasAnyRole("LANDLORD", "BROKER", "ADMIN")
+
+                        .requestMatchers("/api/v1/inquiries/**")
+                        .authenticated()
+
+                        // =====================================================
+                        // PROPERTY VERIFICATION
+                        // =====================================================
+
+                        // Property owner submits verification
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/properties/*/verify"
+                        )
+                        .hasAnyRole("LANDLORD", "ADMIN")
+
+                        // Admin reviews verification
+                        .requestMatchers(
+                                "/api/admin/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        // =====================================================
+                        // ADMIN APIs
+                        // =====================================================
+                        .requestMatchers("/api/v1/admin/**")
+                        .hasRole("ADMIN")
+
+                        // =====================================================
+                        // OWNER APIs
+                        // =====================================================
+                        .requestMatchers("/api/v1/owner/**")
+                        .hasAnyRole("LANDLORD", "ADMIN")
+
+                        // =====================================================
+                        // REPORTS
+                        // =====================================================
+
+                        // Anyone authenticated can submit a report
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/reports"
+                        )
+                        .authenticated()
+
+                        // Only admins can view reports
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/reports/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        // Only admins can change report status
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/v1/reports/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        // =====================================================
+                        // STATIC UPLOADS
+                        // =====================================================
+                        .requestMatchers("/uploads/**")
+                        .permitAll()
+
+                        // =====================================================
+                        // EVERYTHING ELSE
+                        // =====================================================
+                        .anyRequest()
+                        .authenticated()
+                )
+
+                // =============================================================
+                // JWT FILTER
+                // =============================================================
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
