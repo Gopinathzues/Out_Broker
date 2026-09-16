@@ -5,8 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import outbroker_backend.auth.dto.AuthResponse;
 import outbroker_backend.auth.dto.SendOtpRequest;
 import outbroker_backend.auth.dto.VerifyOtpRequest;
-import outbroker_backend.common.enums.UserRole;
-import outbroker_backend.common.enums.VerificationStatus;
 import outbroker_backend.user.entity.User;
 import outbroker_backend.user.entity.UserSession;
 import outbroker_backend.user.repository.UserRepository;
