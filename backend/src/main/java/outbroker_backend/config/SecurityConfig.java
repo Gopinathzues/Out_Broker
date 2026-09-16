@@ -80,6 +80,7 @@ public class SecurityConfig {
                                 "/api/v1/properties/search"
                         )
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/search/v2").permitAll()
 
                         .requestMatchers(
                                 HttpMethod.GET,
