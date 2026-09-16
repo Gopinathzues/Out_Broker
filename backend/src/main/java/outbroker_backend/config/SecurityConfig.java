@@ -188,6 +188,7 @@ public class SecurityConfig {
                         // =====================================================
                         .requestMatchers("/uploads/**")
                         .permitAll()
+                        .requestMatchers("/ws/**").permitAll()
 
                         // =====================================================
                         // EVERYTHING ELSE
