@@ -11,99 +11,90 @@ import java.util.List;
 
 public class PropertySpecification {
 
-    private PropertySpecification() {
-        // Utility class
-    }
+        private PropertySpecification() {
+                // Utility class
+        }
 
-    public static Specification<Property> buildSpecification(PropertySearchCriteria criteria) {
-        return (root, query, criteriaBuilder) -> {
+        public static Specification<Property> buildSpecification(PropertySearchCriteria criteria) {
+                return (root, query, criteriaBuilder) -> {
 
-            List<Predicate> predicates = new ArrayList<>();
+                        List<Predicate> predicates = new ArrayList<>();
 
-            // Only show available properties by default
-            PropertyStatus statusToFilter =
-                    criteria.getStatus() != null
-                            ? criteria.getStatus()
-                            : PropertyStatus.AVAILABLE;
+                        // Only show available properties by default
+                        PropertyStatus statusToFilter = criteria.getStatus() != null
+                                        ? criteria.getStatus()
+                                        : PropertyStatus.AVAILABLE;
 
-            predicates.add(
-                    criteriaBuilder.equal(
-                            root.get("status"),
-                            statusToFilter
-                    )
-            );
+                        predicates.add(
+                                        criteriaBuilder.equal(
+                                                        root.get("status"),
+                                                        statusToFilter));
+                        if (statusToFilter == PropertyStatus.AVAILABLE) {
+                                predicates.add(
+                                                criteriaBuilder.or(
+                                                                criteriaBuilder.isNull(root.get("expiresAt")),
+                                                                criteriaBuilder.greaterThan(
+                                                                                root.get("expiresAt"),
+                                                                                java.time.LocalDateTime.now())));
+                        }
 
-            // City
-            if (criteria.getCity() != null
-                    && !criteria.getCity().trim().isEmpty()) {
+                        // City
+                        if (criteria.getCity() != null
+                                        && !criteria.getCity().trim().isEmpty()) {
 
-                predicates.add(
-                        criteriaBuilder.equal(
-                                criteriaBuilder.lower(root.get("city")),
-                                criteria.getCity().trim().toLowerCase()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.equal(
+                                                                criteriaBuilder.lower(root.get("city")),
+                                                                criteria.getCity().trim().toLowerCase()));
+                        }
 
-            // Minimum rent
-            if (criteria.getMinRent() != null) {
+                        // Minimum rent
+                        if (criteria.getMinRent() != null) {
 
-                predicates.add(
-                        criteriaBuilder.greaterThanOrEqualTo(
-                                root.get("monthlyRent"),
-                                criteria.getMinRent()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.greaterThanOrEqualTo(
+                                                                root.get("monthlyRent"),
+                                                                criteria.getMinRent()));
+                        }
 
-            // Maximum rent
-            if (criteria.getMaxRent() != null) {
+                        // Maximum rent
+                        if (criteria.getMaxRent() != null) {
 
-                predicates.add(
-                        criteriaBuilder.lessThanOrEqualTo(
-                                root.get("monthlyRent"),
-                                criteria.getMaxRent()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.lessThanOrEqualTo(
+                                                                root.get("monthlyRent"),
+                                                                criteria.getMaxRent()));
+                        }
 
-            // Property type
-            if (criteria.getPropertyType() != null) {
+                        // Property type
+                        if (criteria.getPropertyType() != null) {
 
-                predicates.add(
-                        criteriaBuilder.equal(
-                                root.get("propertyType"),
-                                criteria.getPropertyType()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.equal(
+                                                                root.get("propertyType"),
+                                                                criteria.getPropertyType()));
+                        }
 
-            // Bedrooms
-            if (criteria.getBedrooms() != null) {
+                        // Bedrooms
+                        if (criteria.getBedrooms() != null) {
 
-                predicates.add(
-                        criteriaBuilder.greaterThanOrEqualTo(
-                                root.get("bedrooms"),
-                                criteria.getBedrooms()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.greaterThanOrEqualTo(
+                                                                root.get("bedrooms"),
+                                                                criteria.getBedrooms()));
+                        }
 
-            // Bathrooms
-            if (criteria.getBathrooms() != null) {
+                        // Bathrooms
+                        if (criteria.getBathrooms() != null) {
 
-                predicates.add(
-                        criteriaBuilder.greaterThanOrEqualTo(
-                                root.get("bathrooms"),
-                                criteria.getBathrooms()
-                        )
-                );
-            }
+                                predicates.add(
+                                                criteriaBuilder.greaterThanOrEqualTo(
+                                                                root.get("bathrooms"),
+                                                                criteria.getBathrooms()));
+                        }
 
-            return criteriaBuilder.and(
-                    predicates.toArray(new Predicate[0])
-            );
-        };
-    }
+                        return criteriaBuilder.and(
+                                        predicates.toArray(new Predicate[0]));
+                };
+        }
 }
-

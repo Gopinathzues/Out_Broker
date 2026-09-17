@@ -80,8 +80,11 @@ public PropertyImageResponse uploadImage(UUID propertyId, MultipartFile file, bo
 
     @Transactional
     public void deleteImage(UUID propertyId, UUID imageId) {
-        PropertyImage image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found with ID: " + imageId));
+        PropertyImage image = imageRepository
+        .findByIdAndPropertyId(imageId, propertyId)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Image not found for this property"));
 
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found with ID: " + propertyId));

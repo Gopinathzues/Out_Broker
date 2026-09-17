@@ -36,34 +36,13 @@ public class OwnerPropertyController {
             @PathVariable UUID propertyId,
             Authentication authentication) {
 
-        UUID ownerId = extractUserId(authentication);
+        User currentUser = (User) authentication.getPrincipal();
 
         listingLifecycleService.refreshListing(
                 propertyId,
-                ownerId
+                currentUser
         );
 
         return ResponseEntity.ok().build();
-    }
-
-    private UUID extractUserId(Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
-        }
-
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof User user) {
-            return user.getId();
-        }
-
-        try {
-            return UUID.fromString(authentication.getName());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(
-                    "Unable to determine authenticated user ID"
-            );
-        }
     }
 }
