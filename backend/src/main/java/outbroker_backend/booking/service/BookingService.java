@@ -101,7 +101,16 @@ public class BookingService {
 
         String currentStatus = booking.getStatus().toUpperCase();
         String newStatus = request.getStatus().trim().toUpperCase();
+        if ("CONFIRMED".equals(newStatus)) {
+            boolean alreadyConfirmed = bookingRepository.existsConfirmedBooking(
+                    booking.getProperty().getId(),
+                    booking.getVisitDateTime());
 
+            if (alreadyConfirmed && !"CONFIRMED".equals(currentStatus)) {
+                throw new IllegalArgumentException(
+                        "Another booking is already confirmed for this property and visit time");
+            }
+        }
         validateStatusTransition(
                 currentStatus,
                 newStatus,
