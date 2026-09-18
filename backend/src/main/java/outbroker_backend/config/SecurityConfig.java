@@ -42,6 +42,7 @@ public class SecurityConfig {
                 // STATELESS JWT SECURITY
                 // =====================================================
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(org.springframework.security.config.Customizer.withDefaults())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
