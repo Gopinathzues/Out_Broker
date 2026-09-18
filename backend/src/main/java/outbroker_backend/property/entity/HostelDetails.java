@@ -7,7 +7,9 @@ import outbroker_backend.common.enums.RoomType;
 import java.util.UUID;
 
 @Entity
-@Table(name = "hostel_details")
+@Table(name = "hostel_details", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_hostel_details_property", columnNames = { "property_id" })
+})
 public class HostelDetails {
 
     @Id
@@ -44,36 +46,87 @@ public class HostelDetails {
     @Column(name = "notice_period_days")
     private Integer noticePeriodDays;
 
-    public HostelDetails() {}
+    public HostelDetails() {
+    }
 
     // Getters and Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Property getProperty() { return property; }
-    public void setProperty(Property property) { this.property = property; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public GenderRestriction getGenderRestriction() { return genderRestriction; }
-    public void setGenderRestriction(GenderRestriction genderRestriction) { this.genderRestriction = genderRestriction; }
+    public Property getProperty() {
+        return property;
+    }
 
-    public RoomType getRoomType() { return roomType; }
-    public void setRoomType(RoomType roomType) { this.roomType = roomType; }
+    public void setProperty(Property property) {
+        this.property = property;
+    }
 
-    public boolean isFoodIncluded() { return foodIncluded; }
-    public void setFoodIncluded(boolean foodIncluded) { this.foodIncluded = foodIncluded; }
+    public GenderRestriction getGenderRestriction() {
+        return genderRestriction;
+    }
 
-    public boolean isAcAvailable() { return acAvailable; }
-    public void setAcAvailable(boolean acAvailable) { this.acAvailable = acAvailable; }
+    public void setGenderRestriction(GenderRestriction genderRestriction) {
+        this.genderRestriction = genderRestriction;
+    }
 
-    public Integer getTotalBeds() { return totalBeds; }
-    public void setTotalBeds(Integer totalBeds) { this.totalBeds = totalBeds; }
+    public RoomType getRoomType() {
+        return roomType;
+    }
 
-    public Integer getAvailableBeds() { return availableBeds; }
-    public void setAvailableBeds(Integer availableBeds) { this.availableBeds = availableBeds; }
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
+    }
 
-    public String getCurfewTime() { return curfewTime; }
-    public void setCurfewTime(String curfewTime) { this.curfewTime = curfewTime; }
+    public boolean isFoodIncluded() {
+        return foodIncluded;
+    }
 
-    public Integer getNoticePeriodDays() { return noticePeriodDays; }
-    public void setNoticePeriodDays(Integer noticePeriodDays) { this.noticePeriodDays = noticePeriodDays; }
+    public void setFoodIncluded(boolean foodIncluded) {
+        this.foodIncluded = foodIncluded;
+    }
+
+    public boolean isAcAvailable() {
+        return acAvailable;
+    }
+
+    public void setAcAvailable(boolean acAvailable) {
+        this.acAvailable = acAvailable;
+    }
+
+    public Integer getTotalBeds() {
+        return totalBeds;
+    }
+
+    public void setTotalBeds(Integer totalBeds) {
+        this.totalBeds = totalBeds;
+    }
+
+    public Integer getAvailableBeds() {
+        return availableBeds;
+    }
+
+    public void setAvailableBeds(Integer availableBeds) {
+        this.availableBeds = availableBeds;
+    }
+
+    public String getCurfewTime() {
+        return curfewTime;
+    }
+
+    public void setCurfewTime(String curfewTime) {
+        this.curfewTime = curfewTime;
+    }
+
+    public Integer getNoticePeriodDays() {
+        return noticePeriodDays;
+    }
+
+    public void setNoticePeriodDays(Integer noticePeriodDays) {
+        this.noticePeriodDays = noticePeriodDays;
+    }
 }
