@@ -12,7 +12,6 @@ import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.user.dto.UpdateProfileRequest;
 import outbroker_backend.user.dto.UserProfileResponse;
 import outbroker_backend.user.entity.User;
-import outbroker_backend.user.entity.UserSession;
 import outbroker_backend.user.repository.UserRepository;
 import outbroker_backend.user.repository.UserSessionRepository;
 
