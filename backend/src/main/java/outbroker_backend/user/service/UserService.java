@@ -5,13 +5,16 @@ import org.springframework.transaction.annotation.Transactional;
 import outbroker_backend.booking.entity.Booking;
 import outbroker_backend.booking.repository.BookingRepository;
 import outbroker_backend.common.enums.PropertyStatus;
+import outbroker_backend.common.enums.UserRole;
 import outbroker_backend.common.exception.ResourceNotFoundException;
 import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.user.dto.UpdateProfileRequest;
 import outbroker_backend.user.dto.UserProfileResponse;
 import outbroker_backend.user.entity.User;
+import outbroker_backend.user.entity.UserSession;
 import outbroker_backend.user.repository.UserRepository;
+import outbroker_backend.user.repository.UserSessionRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,15 +25,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PropertyRepository propertyRepository;
     private final BookingRepository bookingRepository;
+    private final UserSessionRepository userSessionRepository;
 
     public UserService(
             UserRepository userRepository,
             PropertyRepository propertyRepository,
-            BookingRepository bookingRepository
+            BookingRepository bookingRepository,
+            UserSessionRepository userSessionRepository
     ) {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.bookingRepository = bookingRepository;
+        this.userSessionRepository = userSessionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -84,14 +90,19 @@ public class UserService {
 
         validateAccountDeletion(user);
 
-        userRepository.delete(user);
+        userSessionRepository.revokeAllActiveUserSessions(user);
+
+        user.setPhoneNumber("deleted_" + UUID.randomUUID());
+        user.setFullName("Deleted User");
+        user.setEmail(null);
+
+        userRepository.save(user);
     }
 
     private void validateAccountDeletion(User user) {
 
         UUID userId = user.getId();
 
-        // Check bookings where the user is the tenant.
         List<Booking> tenantBookings =
                 bookingRepository.findByTenantIdOrderByVisitDateTimeDesc(userId);
 
@@ -101,9 +112,7 @@ public class UserService {
             );
         }
 
-        // Landlords cannot delete their account while
-        // they have active listings or active bookings.
-        if (user.getRole() == outbroker_backend.common.enums.UserRole.LANDLORD) {
+        if (user.getRole() == UserRole.LANDLORD) {
 
             List<Property> properties =
                     propertyRepository.findByOwnerId(userId);
