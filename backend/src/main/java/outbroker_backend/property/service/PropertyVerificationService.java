@@ -20,39 +20,86 @@ public class PropertyVerificationService {
     private final PropertyVerificationRepository verificationRepository;
     private final PropertyService propertyService;
 
-    public PropertyVerificationService(PropertyVerificationRepository verificationRepository, PropertyService propertyService) {
+    public PropertyVerificationService(
+            PropertyVerificationRepository verificationRepository,
+            PropertyService propertyService) {
+
         this.verificationRepository = verificationRepository;
         this.propertyService = propertyService;
     }
 
     @Transactional
-    public PropertyVerification submitForVerification(UUID propertyId, String documentUrl, User currentUser) {
+    public PropertyVerification submitForVerification(
+            UUID propertyId,
+            String documentUrl,
+            User currentUser) {
+
         Property property = propertyService.getPropertyById(propertyId);
 
-        if (currentUser.getRole() != UserRole.ADMIN && 
-            (property.getOwner() == null || !property.getOwner().getId().equals(currentUser.getId()))) {
-            throw new AccessDeniedException("You do not own this property.");
+        if (currentUser.getRole() != UserRole.ADMIN
+                && (property.getOwner() == null
+                || !property.getOwner().getId().equals(currentUser.getId()))) {
+
+            throw new AccessDeniedException(
+                    "You do not own this property."
+            );
         }
 
-        PropertyVerification verification = verificationRepository.findByPropertyId(propertyId)
-                .orElseGet(() -> new PropertyVerification(property, documentUrl));
+        if (documentUrl == null || documentUrl.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Document URL is required."
+            );
+        }
 
-        verification.setDocumentUrl(documentUrl);
-        verification.setVerificationStatus(VerificationStatus.BASIC_VERIFIED);
+        PropertyVerification verification =
+                verificationRepository.findByPropertyId(propertyId)
+                        .orElseGet(() ->
+                                new PropertyVerification(
+                                        property,
+                                        documentUrl
+                                ));
+
+        verification.setDocumentUrl(documentUrl.trim());
+
+        // Submission does not mean verification.
+        // Admin review must determine the actual verification status.
+        verification.setVerificationStatus(
+                VerificationStatus.UNVERIFIED
+        );
+
         verification.setReviewedAt(null);
         verification.setReviewedByAdmin(null);
+        verification.setAdminNotes(null);
 
         return verificationRepository.save(verification);
     }
 
     @Transactional
-    public PropertyVerification reviewPropertyVerification(UUID propertyId, VerificationStatus newStatus, String adminNotes, User adminUser) {
+    public PropertyVerification reviewPropertyVerification(
+            UUID propertyId,
+            VerificationStatus newStatus,
+            String adminNotes,
+            User adminUser) {
+
         if (adminUser.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("Only admins can review property verification submissions.");
+            throw new AccessDeniedException(
+                    "Only admins can review property verification submissions."
+            );
         }
 
-        PropertyVerification verification = verificationRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new IllegalArgumentException("No verification request found for property ID: " + propertyId));
+        if (newStatus == null) {
+            throw new IllegalArgumentException(
+                    "Verification status is required."
+            );
+        }
+
+        PropertyVerification verification =
+                verificationRepository.findByPropertyId(propertyId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "No verification request found for property ID: "
+                                                + propertyId
+                                ));
 
         verification.setVerificationStatus(newStatus);
         verification.setAdminNotes(adminNotes);
@@ -63,7 +110,9 @@ public class PropertyVerificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<PropertyVerification> getVerificationsByStatus(VerificationStatus status) {
+    public List<PropertyVerification> getVerificationsByStatus(
+            VerificationStatus status) {
+
         return verificationRepository.findByVerificationStatus(status);
     }
 }

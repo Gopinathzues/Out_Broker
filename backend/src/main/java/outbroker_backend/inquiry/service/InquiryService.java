@@ -27,8 +27,12 @@ public class InquiryService {
 
     @Transactional
     public InquiryResponse createInquiry(UUID tenantId, CreateInquiryRequest request) {
-        Property property = propertyRepository.findById(request.getPropertyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with ID: " + request.getPropertyId()));
+        Property property = propertyRepository.findPublicPropertyById(
+                request.getPropertyId(),
+                outbroker_backend.common.enums.PropertyStatus.AVAILABLE,
+                java.time.LocalDateTime.now()).orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Property not found or no longer available"));
 
         Inquiry inquiry = Inquiry.builder()
                 .propertyId(request.getPropertyId())
@@ -85,4 +89,4 @@ public class InquiryService {
                 .createdAt(inquiry.getCreatedAt())
                 .build();
     }
-} 
+}

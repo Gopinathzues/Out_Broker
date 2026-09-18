@@ -19,11 +19,9 @@ import java.util.UUID;
 )
 public class AdminController {
 
-    private final PropertyService propertyService;
     private final ReportService reportService;
 
     public AdminController(PropertyService propertyService, ReportService reportService) {
-        this.propertyService = propertyService;
         this.reportService = reportService;
     }
 
