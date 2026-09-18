@@ -26,106 +26,238 @@ import java.util.stream.Collectors;
 @Service
 public class PropertyImageService {
 
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+
     private final PropertyImageRepository imageRepository;
     private final PropertyRepository propertyRepository;
 
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
 
-    public PropertyImageService(PropertyImageRepository imageRepository, PropertyRepository propertyRepository) {
+    public PropertyImageService(
+            PropertyImageRepository imageRepository,
+            PropertyRepository propertyRepository) {
         this.imageRepository = imageRepository;
         this.propertyRepository = propertyRepository;
     }
 
     @Transactional
-public PropertyImageResponse uploadImage(UUID propertyId, MultipartFile file, boolean isPrimary) throws IOException {
-    Property property = propertyRepository.findById(propertyId)
-            .orElseThrow(() -> new ResourceNotFoundException("Property not found with ID: " + propertyId));
+    public PropertyImageResponse uploadImage(
+            UUID propertyId,
+            MultipartFile file,
+            boolean isPrimary) throws IOException {
 
-    validateOwnership(property);
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Property not found with ID: " + propertyId));
 
-    // If new image is primary, set all existing images for this property to non-primary
-    if (isPrimary) {
-        List<PropertyImage> existingImages = imageRepository.findByPropertyId(propertyId);
-        for (PropertyImage img : existingImages) {
-            if (Boolean.TRUE.equals(img.isPrimary())) {
-                img.setPrimary(false);
-                imageRepository.save(img);
+        validateOwnership(property);
+        validateImage(file);
+
+        if (isPrimary) {
+            List<PropertyImage> existingImages =
+                    imageRepository.findByPropertyId(propertyId);
+
+            for (PropertyImage img : existingImages) {
+                if (Boolean.TRUE.equals(img.isPrimary())) {
+                    img.setPrimary(false);
+                    imageRepository.save(img);
+                }
             }
         }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = getSafeExtension(originalFilename);
+
+        String fileName = UUID.randomUUID() + extension;
+
+        Path uploadRoot = Paths.get(uploadDir)
+                .toAbsolutePath()
+                .normalize();
+
+        Path targetPath = uploadRoot
+                .resolve("properties")
+                .resolve(propertyId.toString())
+                .resolve(fileName)
+                .normalize();
+
+        if (!targetPath.startsWith(uploadRoot)) {
+            throw new IOException("Invalid file path");
+        }
+
+        Files.createDirectories(targetPath.getParent());
+        Files.copy(file.getInputStream(), targetPath);
+
+        PropertyImage image = new PropertyImage();
+        image.setPropertyId(propertyId);
+        image.setImageUrl(
+                "/uploads/properties/"
+                        + propertyId
+                        + "/"
+                        + fileName
+        );
+        image.setPrimary(isPrimary);
+
+        PropertyImage savedImage = imageRepository.save(image);
+
+        return mapToResponse(savedImage);
     }
-
-    // Save physical file
-    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-    Path targetPath = Paths.get(uploadDir, "properties", propertyId.toString(), fileName);
-    Files.createDirectories(targetPath.getParent());
-    Files.copy(file.getInputStream(), targetPath);
-
-    // Save entity
-    PropertyImage image = new PropertyImage();
-    image.setPropertyId(propertyId);
-    image.setImageUrl("/uploads/properties/" + propertyId + "/" + fileName);
-    image.setPrimary(isPrimary);
-
-    PropertyImage savedImage = imageRepository.save(image);
-    return mapToResponse(savedImage);
-}
 
     @Transactional(readOnly = true)
     public List<PropertyImageResponse> getPropertyImages(UUID propertyId) {
-        return imageRepository.findByPropertyId(propertyId).stream()
+        return imageRepository.findByPropertyId(propertyId)
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void deleteImage(UUID propertyId, UUID imageId) {
+
         PropertyImage image = imageRepository
-        .findByIdAndPropertyId(imageId, propertyId)
-        .orElseThrow(() ->
-                new ResourceNotFoundException(
-                        "Image not found for this property"));
+                .findByIdAndPropertyId(imageId, propertyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Image not found for this property"));
 
         Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Property not found with ID: " + propertyId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Property not found with ID: " + propertyId));
 
         validateOwnership(property);
 
-        // 1. Delete physical file from disk
         deletePhysicalFile(image.getImageUrl());
 
-        // 2. Delete database record
         imageRepository.delete(image);
     }
 
+    private void validateImage(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Image file cannot be empty");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException(
+                    "Image file size cannot exceed 10 MB");
+        }
+
+        String contentType = file.getContentType();
+
+        if (!"image/jpeg".equalsIgnoreCase(contentType)
+                && !"image/png".equalsIgnoreCase(contentType)
+                && !"image/webp".equalsIgnoreCase(contentType)) {
+
+            throw new IllegalArgumentException(
+                    "Only JPEG, PNG and WebP images are allowed");
+        }
+    }
+
+    private String getSafeExtension(String originalFilename) {
+
+        if (originalFilename == null
+                || originalFilename.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Image filename is required");
+        }
+
+        String filename = Paths.get(originalFilename)
+                .getFileName()
+                .toString();
+
+        int dotIndex = filename.lastIndexOf('.');
+
+        if (dotIndex <= 0 || dotIndex == filename.length() - 1) {
+            throw new IllegalArgumentException(
+                    "Image must have a valid file extension");
+        }
+
+        String extension =
+                filename.substring(dotIndex).toLowerCase();
+
+        if (!extension.equals(".jpg")
+                && !extension.equals(".jpeg")
+                && !extension.equals(".png")
+                && !extension.equals(".webp")) {
+
+            throw new IllegalArgumentException(
+                    "Only JPG, JPEG, PNG and WebP images are allowed");
+        }
+
+        return extension;
+    }
+
     private void validateOwnership(Property property) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        Authentication auth =
+                SecurityContextHolder.getContext()
+                        .getAuthentication();
+
         if (auth == null || !auth.isAuthenticated()) {
-            throw new AccessDeniedException("User is not authenticated");
+            throw new AccessDeniedException(
+                    "User is not authenticated");
         }
 
         User currentUser = (User) auth.getPrincipal();
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+        boolean isAdmin = auth.getAuthorities()
+                .stream()
+                .anyMatch(a ->
+                        a.getAuthority().equals("ROLE_ADMIN")
+                                || a.getAuthority().equals("ADMIN"));
 
-        if (!isAdmin && !property.getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("You do not have permission to modify images for this property");
+        if (!isAdmin
+                && !property.getOwner().getId()
+                        .equals(currentUser.getId())) {
+
+            throw new AccessDeniedException(
+                    "You do not have permission to modify images for this property");
         }
     }
 
     private void deletePhysicalFile(String imageUrl) {
-        if (imageUrl == null || imageUrl.isBlank()) return;
+
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+
         try {
-            String relativePath = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl;
-            Path filePath = Paths.get(relativePath);
+            String relativePath = imageUrl.startsWith("/")
+                    ? imageUrl.substring(1)
+                    : imageUrl;
+
+            Path uploadRoot = Paths.get(uploadDir)
+                    .toAbsolutePath()
+                    .normalize();
+
+            Path filePath = uploadRoot
+                    .resolve(
+                            relativePath.startsWith("uploads/")
+                                    ? relativePath.substring("uploads/".length())
+                                    : relativePath
+                    )
+                    .normalize();
+
+            if (!filePath.startsWith(uploadRoot)) {
+                throw new IOException(
+                        "Invalid file deletion path");
+            }
+
             Files.deleteIfExists(filePath);
+
         } catch (IOException e) {
-            System.err.println("Failed to delete physical file: " + e.getMessage());
+            System.err.println(
+                    "Failed to delete physical file: "
+                            + e.getMessage());
         }
     }
 
-    private PropertyImageResponse mapToResponse(PropertyImage image) {
+    private PropertyImageResponse mapToResponse(
+            PropertyImage image) {
+
         return new PropertyImageResponse(
                 image.getId(),
                 image.getPropertyId(),
