@@ -41,12 +41,17 @@ public class AuthService {
 
     @Transactional
     public AuthResponse verifyOtp(VerifyOtpRequest request) {
-        boolean isValid = otpService.validateOtp(request.getPhoneNumber(), request.getOtp());
+        boolean isValid = otpService.validateOtp(
+                request.getPhoneNumber(),
+                request.getOtp()
+        );
+
         if (!isValid) {
             throw new IllegalArgumentException("Invalid or expired OTP");
         }
 
-        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+        User user = userRepository
+                .findByPhoneNumber(request.getPhoneNumber())
                 .orElseGet(() -> {
                     User newUser = new User(request.getPhoneNumber());
                     return userRepository.save(newUser);
@@ -60,8 +65,11 @@ public class AuthService {
                 hashToken(refreshToken),
                 request.getDeviceInfo(),
                 null,
-                LocalDateTime.now().plusDays(7)
+                LocalDateTime.now().plusNanos(
+                        jwtService.getRefreshExpiration() * 1_000_000L
+                )
         );
+
         userSessionRepository.save(session);
 
         return new AuthResponse(
@@ -78,19 +86,29 @@ public class AuthService {
     public AuthResponse refreshToken(String refreshToken) {
         String hashedToken = hashToken(refreshToken);
 
-        UserSession session = userSessionRepository.findByRefreshTokenHashAndIsRevokedFalse(hashedToken)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid or revoked refresh token"));
+        UserSession session = userSessionRepository
+                .findByRefreshTokenHashAndIsRevokedFalse(hashedToken)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Invalid or revoked refresh token"
+                        )
+                );
 
         if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
             session.setRevoked(true);
             userSessionRepository.save(session);
-            throw new IllegalArgumentException("Refresh token has expired");
+
+            throw new IllegalArgumentException(
+                    "Refresh token has expired"
+            );
         }
 
         User user = session.getUser();
+
         String newAccessToken = jwtService.generateToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
 
+        // Rotate refresh token: invalidate the old session.
         session.setRevoked(true);
         userSessionRepository.save(session);
 
@@ -99,8 +117,11 @@ public class AuthService {
                 hashToken(newRefreshToken),
                 session.getDeviceInfo(),
                 session.getIpAddress(),
-                LocalDateTime.now().plusNanos(jwtService.getRefreshExpiration() * 1_000_000)
+                LocalDateTime.now().plusNanos(
+                        jwtService.getRefreshExpiration() * 1_000_000L
+                )
         );
+
         userSessionRepository.save(newSession);
 
         return new AuthResponse(
@@ -116,18 +137,31 @@ public class AuthService {
     private String hashToken(String token) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedhash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder(2 * encodedhash.length);
-            for (byte b : encodedhash) {
+
+            byte[] encodedHash = digest.digest(
+                    token.getBytes(StandardCharsets.UTF_8)
+            );
+
+            StringBuilder hexString =
+                    new StringBuilder(2 * encodedHash.length);
+
+            for (byte b : encodedHash) {
                 String hex = Integer.toHexString(0xff & b);
+
                 if (hex.length() == 1) {
                     hexString.append('0');
                 }
+
                 hexString.append(hex);
             }
+
             return hexString.toString();
+
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new IllegalStateException(
+                    "SHA-256 algorithm not available",
+                    e
+            );
         }
     }
 }
