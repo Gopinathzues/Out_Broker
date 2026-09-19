@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         )
                         .permitAll()
-
+                        .requestMatchers("/api/v1/saved-searches/**").authenticated()
                         // =====================================================
                         // PUBLIC PROPERTY DISCOVERY
                         // =====================================================

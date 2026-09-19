@@ -18,6 +18,7 @@ import outbroker_backend.property.repository.PropertyRepository;
 import outbroker_backend.property.specification.PropertySpecification;
 import outbroker_backend.user.entity.User;
 import outbroker_backend.common.exception.ResourceNotFoundException;
+import outbroker_backend.savedsearch.service.SavedSearchService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,9 +29,13 @@ import java.util.stream.Collectors;
 public class PropertyService {
 
         private final PropertyRepository propertyRepository;
+        private final SavedSearchService savedSearchService;
 
-        public PropertyService(PropertyRepository propertyRepository) {
+        public PropertyService(
+                        PropertyRepository propertyRepository,
+                        SavedSearchService savedSearchService) {
                 this.propertyRepository = propertyRepository;
+                this.savedSearchService = savedSearchService;
         }
 
         // =========================================================
@@ -76,7 +81,12 @@ public class PropertyService {
                         property.setExpiresAt(now.plusDays(30));
                 }
 
-                return propertyRepository.save(property);
+                Property savedProperty = propertyRepository.save(property);
+
+                savedSearchService.notifyMatchingSavedSearches(
+                                savedProperty);
+
+                return savedProperty;
         }
 
         // =========================================================

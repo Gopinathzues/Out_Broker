@@ -9,6 +9,7 @@ import outbroker_backend.common.enums.UserRole;
 import outbroker_backend.common.exception.ResourceNotFoundException;
 import outbroker_backend.property.entity.Property;
 import outbroker_backend.property.repository.PropertyRepository;
+import outbroker_backend.savedsearch.service.SavedSearchService;
 import outbroker_backend.user.dto.UpdateProfileRequest;
 import outbroker_backend.user.dto.UserProfileResponse;
 import outbroker_backend.user.entity.User;
@@ -25,21 +26,25 @@ public class UserService {
     private final PropertyRepository propertyRepository;
     private final BookingRepository bookingRepository;
     private final UserSessionRepository userSessionRepository;
+    private final SavedSearchService savedSearchService;
 
     public UserService(
             UserRepository userRepository,
             PropertyRepository propertyRepository,
             BookingRepository bookingRepository,
-            UserSessionRepository userSessionRepository
+            UserSessionRepository userSessionRepository,
+            SavedSearchService savedSearchService
     ) {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.bookingRepository = bookingRepository;
         this.userSessionRepository = userSessionRepository;
+        this.savedSearchService = savedSearchService;
     }
 
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(UUID userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -55,6 +60,7 @@ public class UserService {
             UUID userId,
             UpdateProfileRequest request
     ) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -64,12 +70,20 @@ public class UserService {
 
         if (request.getFullName() != null
                 && !request.getFullName().isBlank()) {
-            user.setFullName(request.getFullName().trim());
+
+            user.setFullName(
+                    request.getFullName().trim()
+            );
         }
 
         if (request.getEmail() != null
                 && !request.getEmail().isBlank()) {
-            user.setEmail(request.getEmail().trim().toLowerCase());
+
+            user.setEmail(
+                    request.getEmail()
+                            .trim()
+                            .toLowerCase()
+            );
         }
 
         User updatedUser = userRepository.save(user);
@@ -89,10 +103,25 @@ public class UserService {
 
         validateAccountDeletion(user);
 
+        /*
+         * Revoke all active sessions.
+         */
         userSessionRepository.revokeAllActiveUserSessions(user);
 
-        user.setPhoneNumber("deleted_" + UUID.randomUUID());
+        /*
+         * Remove all saved searches belonging to this user.
+         */
+        savedSearchService.deleteUserSavedSearches(userId);
+
+        /*
+         * Anonymize the account.
+         */
+        user.setPhoneNumber(
+                "deleted_" + UUID.randomUUID()
+        );
+
         user.setFullName("Deleted User");
+
         user.setEmail(null);
 
         userRepository.save(user);
@@ -102,26 +131,38 @@ public class UserService {
 
         UUID userId = user.getId();
 
+        /*
+         * Check tenant bookings.
+         */
         List<Booking> tenantBookings =
-                bookingRepository.findByTenantIdOrderByVisitDateTimeDesc(userId);
+                bookingRepository
+                        .findByTenantIdOrderByVisitDateTimeDesc(userId);
 
-        if (tenantBookings.stream().anyMatch(this::isActiveBooking)) {
+        if (tenantBookings.stream()
+                .anyMatch(this::isActiveBooking)) {
+
             throw new IllegalStateException(
                     "Account cannot be deleted while you have pending or confirmed bookings."
             );
         }
 
+        /*
+         * Additional checks for landlords.
+         */
         if (user.getRole() == UserRole.LANDLORD) {
 
             List<Property> properties =
                     propertyRepository.findByOwnerId(userId);
 
-            boolean hasActiveProperty = properties.stream()
-                    .anyMatch(property ->
-                            property.getStatus() == PropertyStatus.AVAILABLE
-                    );
+            boolean hasActiveProperty =
+                    properties.stream()
+                            .anyMatch(property ->
+                                    property.getStatus()
+                                            == PropertyStatus.AVAILABLE
+                            );
 
             if (hasActiveProperty) {
+
                 throw new IllegalStateException(
                         "Account cannot be deleted while you have active property listings."
                 );
@@ -130,7 +171,9 @@ public class UserService {
             List<Booking> ownerBookings =
                     bookingRepository.findByOwnerId(userId);
 
-            if (ownerBookings.stream().anyMatch(this::isActiveBooking)) {
+            if (ownerBookings.stream()
+                    .anyMatch(this::isActiveBooking)) {
+
                 throw new IllegalStateException(
                         "Account cannot be deleted while you have pending or confirmed property bookings."
                 );
