@@ -14,14 +14,29 @@ import java.util.UUID;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
-    boolean existsByTenantIdAndPropertyId(UUID tenantId, UUID propertyId);
+    boolean existsByTenantIdAndPropertyId(
+            UUID tenantId,
+            UUID propertyId
+    );
 
-    Optional<Review> findByTenantIdAndPropertyId(UUID tenantId, UUID propertyId);
+    Optional<Review> findByTenantIdAndPropertyId(
+            UUID tenantId,
+            UUID propertyId
+    );
 
-    Page<Review> findByPropertyId(UUID propertyId, Pageable pageable);
+    Page<Review> findByPropertyId(
+            UUID propertyId,
+            Pageable pageable
+    );
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.property.id = :propertyId")
-    Double getAverageRatingByPropertyId(@Param("propertyId") UUID propertyId);
+    @Query("""
+        SELECT AVG(r.rating)
+        FROM Review r
+        WHERE r.property.id = :propertyId
+        """)
+    Double getAverageRatingByPropertyId(
+            @Param("propertyId") UUID propertyId
+    );
 
     Long countByPropertyId(UUID propertyId);
 }

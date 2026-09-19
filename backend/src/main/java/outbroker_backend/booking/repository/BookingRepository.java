@@ -22,7 +22,17 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
         ORDER BY b.visitDateTime DESC
         """)
     List<Booking> findByOwnerId(@Param("ownerId") UUID ownerId);
-
+        @Query("""
+    SELECT COUNT(b) > 0
+    FROM Booking b
+    WHERE b.tenant.id = :tenantId
+      AND b.property.id = :propertyId
+      AND b.status = 'COMPLETED'
+    """)
+boolean existsCompletedBooking(
+        @Param("tenantId") UUID tenantId,
+        @Param("propertyId") UUID propertyId
+);
     @Query("""
         SELECT COUNT(b) > 0
         FROM Booking b
