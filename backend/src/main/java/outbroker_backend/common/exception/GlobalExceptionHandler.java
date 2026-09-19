@@ -10,6 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+
+import outbroker_backend.auth.service.OtpService;
 import outbroker_backend.common.dto.ApiResponse;
 
 import java.util.HashMap;
@@ -30,6 +33,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage()));
     }
+    @ExceptionHandler(OtpService.OtpRateLimitException.class)
+public ResponseEntity<ApiResponse<Object>> handleOtpRateLimit(
+        OtpService.OtpRateLimitException ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.TOO_MANY_REQUESTS)
+            .body(ApiResponse.error(ex.getMessage()));
+}
 
     // 403 - Custom Unauthorized Access
     @ExceptionHandler(UnauthorizedAccessException.class)
