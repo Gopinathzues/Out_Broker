@@ -85,23 +85,36 @@ public class PropertyImageService {
                 }
 
                 Files.createDirectories(targetPath.getParent());
-                
-                try (var inputStream = file.getInputStream()) {
-                        Files.copy(inputStream, targetPath);
-                }
 
-                PropertyImage image = new PropertyImage();
-                image.setPropertyId(propertyId);
-                image.setImageUrl(
-                                "/uploads/properties/"
-                                                + propertyId
-                                                + "/"
-                                                + fileName);
-                image.setPrimary(isPrimary);
+try (var inputStream = file.getInputStream()) {
+    Files.copy(inputStream, targetPath);
+}
 
-                PropertyImage savedImage = imageRepository.save(image);
+try {
+    PropertyImage image = new PropertyImage();
+    image.setPropertyId(propertyId);
+    image.setImageUrl(
+            "/uploads/properties/"
+                    + propertyId
+                    + "/"
+                    + fileName
+    );
+    image.setPrimary(isPrimary);
 
-                return mapToResponse(savedImage);
+    PropertyImage savedImage = imageRepository.save(image);
+
+    return mapToResponse(savedImage);
+
+} catch (RuntimeException e) {
+
+    try {
+        Files.deleteIfExists(targetPath);
+    } catch (IOException cleanupException) {
+        e.addSuppressed(cleanupException);
+    }
+
+    throw e;
+}
         }
 
         @Transactional(readOnly = true)
