@@ -86,35 +86,34 @@ public class PropertyImageService {
 
                 Files.createDirectories(targetPath.getParent());
 
-try (var inputStream = file.getInputStream()) {
-    Files.copy(inputStream, targetPath);
-}
+                try (var inputStream = file.getInputStream()) {
+                        Files.copy(inputStream, targetPath);
+                }
 
-try {
-    PropertyImage image = new PropertyImage();
-    image.setPropertyId(propertyId);
-    image.setImageUrl(
-            "/uploads/properties/"
-                    + propertyId
-                    + "/"
-                    + fileName
-    );
-    image.setPrimary(isPrimary);
+                try {
+                        PropertyImage image = new PropertyImage();
+                        image.setPropertyId(propertyId);
+                        image.setImageUrl(
+                                        "/uploads/properties/"
+                                                        + propertyId
+                                                        + "/"
+                                                        + fileName);
+                        image.setPrimary(isPrimary);
 
-    PropertyImage savedImage = imageRepository.save(image);
+                        PropertyImage savedImage = imageRepository.save(image);
 
-    return mapToResponse(savedImage);
+                        return mapToResponse(savedImage);
 
-} catch (RuntimeException e) {
+                } catch (RuntimeException e) {
 
-    try {
-        Files.deleteIfExists(targetPath);
-    } catch (IOException cleanupException) {
-        e.addSuppressed(cleanupException);
-    }
+                        try {
+                                Files.deleteIfExists(targetPath);
+                        } catch (IOException cleanupException) {
+                                e.addSuppressed(cleanupException);
+                        }
 
-    throw e;
-}
+                        throw e;
+                }
         }
 
         @Transactional(readOnly = true)
@@ -266,10 +265,10 @@ try {
                 }
         }
 
-        private void deletePhysicalFile(String imageUrl) {
+        private boolean deletePhysicalFile(String imageUrl) {
 
                 if (imageUrl == null || imageUrl.isBlank()) {
-                        return;
+                        return true;
                 }
 
                 try {
@@ -295,10 +294,14 @@ try {
 
                         Files.deleteIfExists(filePath);
 
+                        return true;
+
                 } catch (IOException e) {
                         System.err.println(
                                         "Failed to delete physical file: "
                                                         + e.getMessage());
+
+                        return false;
                 }
         }
 
