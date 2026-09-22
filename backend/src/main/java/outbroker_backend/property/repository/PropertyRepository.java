@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import outbroker_backend.common.enums.PropertyStatus;
 import outbroker_backend.property.entity.Property;
 
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 @Repository
 public interface PropertyRepository
         extends JpaRepository<Property, UUID>, JpaSpecificationExecutor<Property> {
