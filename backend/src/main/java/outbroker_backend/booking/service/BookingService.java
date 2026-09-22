@@ -222,20 +222,30 @@ public class BookingService {
 
         if ("CONFIRMED".equals(newStatus)) {
 
-            boolean alreadyConfirmed =
-                    bookingRepository.existsConfirmedBooking(
-                            booking.getProperty().getId(),
-                            booking.getVisitDateTime()
-                    );
+    Property lockedProperty =
+            propertyRepository.findByIdForUpdate(
+                    booking.getProperty().getId()
+            ).orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Property not found with id: "
+                                    + booking.getProperty().getId()
+                    )
+            );
 
-            if (alreadyConfirmed
-                    && !"CONFIRMED".equals(currentStatus)) {
+    boolean alreadyConfirmed =
+            bookingRepository.existsConfirmedBooking(
+                    lockedProperty.getId(),
+                    booking.getVisitDateTime()
+            );
 
-                throw new IllegalArgumentException(
-                        "Another booking is already confirmed for this property and visit time"
-                );
-            }
-        }
+    if (alreadyConfirmed
+            && !"CONFIRMED".equals(currentStatus)) {
+
+        throw new IllegalArgumentException(
+                "Another booking is already confirmed for this property and visit time"
+        );
+    }
+}
 
         validateStatusTransition(
                 currentStatus,
