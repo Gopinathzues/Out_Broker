@@ -8,9 +8,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,8 +22,6 @@ public class SecurityConfig {
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
-
-    
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,10 +41,31 @@ public class SecurityConfig {
                 )
 
                 // =====================================================
+                // SECURITY HEADERS
+                // =====================================================
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(
+                                org.springframework.security.config.Customizer.withDefaults()
+                        )
+                        .referrerPolicy(referrer ->
+                                referrer.policy(
+                                        ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
+                                )
+                        )
+                )
+
+                // =====================================================
                 // AUTHORIZATION
                 // =====================================================
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health").permitAll()
+
+                        // =====================================================
+                        // ACTUATOR
+                        // =====================================================
+                        .requestMatchers("/actuator/health")
+                        .permitAll()
+
                         // =====================================================
                         // AUTHENTICATION
                         // =====================================================
@@ -62,7 +81,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         )
                         .permitAll()
-                        .requestMatchers("/api/v1/saved-searches/**").authenticated()
+
+                        .requestMatchers("/api/v1/saved-searches/**")
+                        .authenticated()
+
                         // =====================================================
                         // PUBLIC PROPERTY DISCOVERY
                         // =====================================================
@@ -151,8 +173,6 @@ public class SecurityConfig {
                         // =====================================================
                         // PROPERTY VERIFICATION
                         // =====================================================
-
-                        // Property owner submits verification
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/properties/*/verify"
@@ -162,7 +182,6 @@ public class SecurityConfig {
                                 "ADMIN"
                         )
 
-                        // Admin property verification APIs
                         .requestMatchers(
                                 "/api/admin/**"
                         )
@@ -190,22 +209,18 @@ public class SecurityConfig {
                         // =====================================================
                         // REPORTS
                         // =====================================================
-
-                        // Authenticated users can submit reports
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/reports"
                         )
                         .authenticated()
 
-                        // Only admins can view reports
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/reports/**"
                         )
                         .hasRole("ADMIN")
 
-                        // Only admins can change report status
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/v1/reports/**"
