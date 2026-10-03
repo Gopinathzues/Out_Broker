@@ -69,10 +69,7 @@ public class PropertyService {
                         property.setTenantPreference(TenantPreference.ANY);
                 }
 
-                if (property.getStatus() == null) {
-                        property.setStatus(PropertyStatus.AVAILABLE);
-                }
-
+                property.setStatus(PropertyStatus.PENDING_VERIFICATION);
                 LocalDateTime now = LocalDateTime.now();
 
                 property.setLastRefreshedAt(now);
