@@ -94,7 +94,8 @@ public class PropertyVerificationService {
 
                 verification.setVerificationStatus(newStatus);
                 verification.setAdminNotes(adminNotes);
-                
+                verification.setReviewedByAdmin(adminUser);
+                verification.setReviewedAt(LocalDateTime.now());
 
                 if (newStatus == VerificationStatus.FULLY_VERIFIED) {
                         verification.getProperty().setStatus(PropertyStatus.AVAILABLE);
