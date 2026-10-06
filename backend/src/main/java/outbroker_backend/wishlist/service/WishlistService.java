@@ -50,7 +50,11 @@ public class WishlistService {
         wishlistRepository.deleteByTenantIdAndPropertyId(tenantId, propertyId);
     }
 
-    
+    @Transactional(readOnly = true)
+    public Page<WishlistResponse> getTenantWishlist(UUID tenantId, Pageable pageable) {
+        return wishlistRepository.findByTenantId(tenantId, pageable)
+                .map(this::mapToResponse);
+    }
 
     @Transactional(readOnly = true)
     public boolean existsInWishlist(UUID tenantId, UUID propertyId) {
