@@ -290,7 +290,7 @@ public class PropertyController {
         updatedDetails.setLongitude(request.getLongitude());
         updatedDetails.setAvailabilityDate(request.getAvailabilityDate());
 
-        updatedDetails.setAmenities(request.getAmenities());
+        
 
         Property updatedProperty =
                 propertyService.updateProperty(
