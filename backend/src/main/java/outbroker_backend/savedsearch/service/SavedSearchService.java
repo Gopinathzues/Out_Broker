@@ -300,16 +300,7 @@ public class SavedSearchService {
             );
         }
 
-        /*
-         * BEDROOM VALIDATION
-         */
-        if (criteria.getBedrooms() != null
-                && criteria.getBedrooms() < 0) {
-
-            throw new IllegalArgumentException(
-                    "Bedrooms cannot be negative"
-            );
-        }
+       
 
         /*
          * BATHROOM VALIDATION
