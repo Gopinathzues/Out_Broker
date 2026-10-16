@@ -2,44 +2,49 @@
 # OutBroker - Git Ignore
 # ==========================================
 
-# Uploaded media assets
+# Uploaded media and user-generated files
 uploads/*
 !uploads/.gitkeep
 
 # Build output
 target/
 build/
-*.class
+out/
 
-# Maven
+# Compiled Java files
+*.class
+hs_err_pid*
+replay_pid*
+
+# Maven wrapper JAR (downloaded/generated)
 .mvn/wrapper/maven-wrapper.jar
 
-# IntelliJ IDEA
+# IDE - IntelliJ IDEA
 .idea/
 *.iml
 *.ipr
 *.iws
 
-# Eclipse / Spring Tool Suite
+# IDE - Eclipse / Spring Tool Suite
 .classpath
 .project
 .settings/
 .springBeans
-.sts4-cache
-.apt_generated
+.sts4-cache/
+.apt_generated/
 .factorypath
 
-# NetBeans
+# IDE - NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-# VS Code
+# IDE - VS Code
 .vscode/
 
-# Operating System
+# Operating system files
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -48,17 +53,18 @@ desktop.ini
 *.log
 logs/
 
-# Local environment / secrets
-application.properties
-application-local.properties
-application-dev.properties
-application-prod.properties
-
-# Environment files
+# Local environment and secrets
 .env
 .env.*
 !.env.example
 
-# Java temporary files
-hs_err_pid*
-replay_pid*
+# Local-only Spring configuration
+application-dev.properties
+application-local.properties
+
+# Temporary files and backups
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
