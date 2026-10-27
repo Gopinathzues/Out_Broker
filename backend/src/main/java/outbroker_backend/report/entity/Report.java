@@ -21,7 +21,7 @@ public class Report extends BaseEntity {
     private String reason;
 
     @Column(name = "status", nullable = false)
-    private String status = "update"; // PENDING, RESOLVED, DISMISSED
+    private String status = "PENDING"; // PENDING, RESOLVED, DISMISSED
 
     public Report() {}
 
