@@ -68,3 +68,6 @@ application-local.properties
 *.swp
 *.swo
 *~
+
+# Node.js dependencies
+node_modules/
